@@ -66,6 +66,9 @@ public class Duke {
         case "unmark":
             markTask(command, taskList, false);
             return;
+        case "delete":
+            deleteTask(command, taskList);
+            return;
         case "todo":
             addTask(taskList, parseTodo(command));
             return;
@@ -175,13 +178,7 @@ public class Duke {
     private static void markTask(String command, TaskList taskList, boolean isMark)
             throws YqrException {
         String commandWord = isMark ? "mark" : "unmark";
-        String numberText = command.substring(commandWord.length()).trim();
-        int taskNumber;
-        try {
-            taskNumber = Integer.parseInt(numberText);
-        } catch (NumberFormatException e) {
-            throw new YqrException("Please input a valid task number");
-        }
+        int taskNumber = parseTaskNumber(command, commandWord);
 
         Task task;
         if (isMark) {
@@ -195,16 +192,56 @@ public class Duke {
     }
 
     /**
+     * Deletes the task identified in a command and displays the updated task count.
+     *
+     * @param command delete command entered by the user
+     * @param taskList list containing the task
+     * @throws YqrException if the task number is missing, invalid, or out of range
+     */
+    private static void deleteTask(String command, TaskList taskList) throws YqrException {
+        int taskNumber = parseTaskNumber(command, "delete");
+        Task deletedTask = taskList.deleteTask(taskNumber);
+        System.out.println("Noted. I've removed this task:");
+        System.out.println("  " + deletedTask);
+        displayTaskCount(taskList);
+    }
+
+    /**
+     * Extracts a task number from a command.
+     *
+     * @param command command containing a task number
+     * @param commandWord command word to remove before parsing
+     * @return parsed task number
+     * @throws YqrException if the task number is missing or not an integer
+     */
+    private static int parseTaskNumber(String command, String commandWord) throws YqrException {
+        String numberText = command.substring(commandWord.length()).trim();
+        try {
+            return Integer.parseInt(numberText);
+        } catch (NumberFormatException e) {
+            throw new YqrException("Please input a valid task number");
+        }
+    }
+
+    /**
      * Adds a task and displays confirmation and the updated task count.
      *
      * @param taskList list to which the task is added
      * @param task task to add
-     * @throws YqrException if the task list is full
      */
-    private static void addTask(TaskList taskList, Task task) throws YqrException {
+    private static void addTask(TaskList taskList, Task task) {
         taskList.addTask(task);
         System.out.println("Got it. I've added this task:");
         System.out.println("  " + task);
+        displayTaskCount(taskList);
+    }
+
+    /**
+     * Displays the number of tasks currently in a list.
+     *
+     * @param taskList task list whose size is displayed
+     */
+    private static void displayTaskCount(TaskList taskList) {
         int taskCount = taskList.getTaskCount();
         String taskWord = taskCount == 1 ? "task" : "tasks";
         System.out.println("Now you have " + taskCount + " " + taskWord + " in the list.");

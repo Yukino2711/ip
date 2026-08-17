@@ -1,24 +1,18 @@
+import java.util.ArrayList;
+
 /**
  * Stores and displays the tasks entered by the user.
  */
 public class TaskList {
-    private static final int MAX_TASKS = 100;
-
-    private final Task[] tasks = new Task[MAX_TASKS];
-    private int taskCount;
+    private final ArrayList<Task> tasks = new ArrayList<>();
 
     /**
      * Adds a task to the list.
      *
      * @param task task to store
-     * @throws YqrException if the list already contains 100 tasks
      */
-    public void addTask(Task task) throws YqrException {
-        if (taskCount >= MAX_TASKS) {
-            throw new YqrException("The task list is full");
-        }
-        tasks[taskCount] = task;
-        taskCount++;
+    public void addTask(Task task) {
+        tasks.add(task);
     }
 
     /**
@@ -27,7 +21,7 @@ public class TaskList {
      * @return number of stored tasks
      */
     public int getTaskCount() {
-        return taskCount;
+        return tasks.size();
     }
 
     /**
@@ -35,9 +29,22 @@ public class TaskList {
      */
     public void displayTasks() {
         System.out.println("Here are the tasks in your list:");
-        for (int i = 0; i < taskCount; i++) {
-            System.out.println((i + 1) + "." + tasks[i]);
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println((i + 1) + "." + tasks.get(i));
         }
+    }
+
+    /**
+     * Deletes a task from the list.
+     *
+     * @param taskNumber one-based number of the task to delete
+     * @return the deleted task
+     * @throws YqrException if the task number is outside the list
+     */
+    public Task deleteTask(int taskNumber) throws YqrException {
+        Task task = getTask(taskNumber);
+        tasks.remove(taskNumber - 1);
+        return task;
     }
 
     /**
@@ -74,9 +81,9 @@ public class TaskList {
      * @throws YqrException if the task number is outside the list
      */
     private Task getTask(int taskNumber) throws YqrException {
-        if (taskNumber < 1 || taskNumber > taskCount) {
+        if (taskNumber < 1 || taskNumber > tasks.size()) {
             throw new YqrException("Please input a valid task number");
         }
-        return tasks[taskNumber - 1];
+        return tasks.get(taskNumber - 1);
     }
 }
