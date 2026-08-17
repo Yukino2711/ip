@@ -36,8 +36,18 @@ public class Duke {
             System.out.println(separator);
             if (command.equals("list")) {
                 taskList.displayTasks();
+            } else if (command.startsWith("mark ")) {
+                int taskNumber = Integer.parseInt(command.substring("mark ".length()).trim());
+                Task task = taskList.markTaskAsDone(taskNumber);
+                System.out.println("Nice! I've marked this task as done:");
+                System.out.println("  " + task);
+            } else if (command.startsWith("unmark ")) {
+                int taskNumber = Integer.parseInt(command.substring("unmark ".length()).trim());
+                Task task = taskList.markTaskAsNotDone(taskNumber);
+                System.out.println("OK, I've marked this task as not done yet:");
+                System.out.println("  " + task);
             } else {
-                taskList.addTask(command);
+                taskList.addTask(new Task(command));
                 System.out.println("added: " + command);
             }
             System.out.println(separator);
