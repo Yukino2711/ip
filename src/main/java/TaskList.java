@@ -11,8 +11,12 @@ public class TaskList {
      * Adds a task to the list.
      *
      * @param task task to store
+     * @throws YqrException if the list already contains 100 tasks
      */
-    public void addTask(Task task) {
+    public void addTask(Task task) throws YqrException {
+        if (taskCount >= MAX_TASKS) {
+            throw new YqrException("The task list is full");
+        }
         tasks[taskCount] = task;
         taskCount++;
     }
@@ -41,9 +45,10 @@ public class TaskList {
      *
      * @param taskNumber one-based number of the task to mark
      * @return the task whose status was changed
+     * @throws YqrException if the task number is outside the list
      */
-    public Task markTaskAsDone(int taskNumber) {
-        Task task = tasks[taskNumber - 1];
+    public Task markTaskAsDone(int taskNumber) throws YqrException {
+        Task task = getTask(taskNumber);
         task.markAsDone();
         return task;
     }
@@ -53,10 +58,25 @@ public class TaskList {
      *
      * @param taskNumber one-based number of the task to unmark
      * @return the task whose status was changed
+     * @throws YqrException if the task number is outside the list
      */
-    public Task markTaskAsNotDone(int taskNumber) {
-        Task task = tasks[taskNumber - 1];
+    public Task markTaskAsNotDone(int taskNumber) throws YqrException {
+        Task task = getTask(taskNumber);
         task.markAsNotDone();
         return task;
+    }
+
+    /**
+     * Returns the task with the given one-based task number.
+     *
+     * @param taskNumber one-based task number
+     * @return corresponding task
+     * @throws YqrException if the task number is outside the list
+     */
+    private Task getTask(int taskNumber) throws YqrException {
+        if (taskNumber < 1 || taskNumber > taskCount) {
+            throw new YqrException("Please input a valid task number");
+        }
+        return tasks[taskNumber - 1];
     }
 }

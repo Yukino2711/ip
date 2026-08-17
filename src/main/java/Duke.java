@@ -25,7 +25,7 @@ public class Duke {
         TaskList taskList = new TaskList();
 
         while (scanner.hasNextLine()) {
-            String command = scanner.nextLine();
+            String command = scanner.nextLine().trim();
             if (command.equals("bye")) {
                 System.out.println(separator);
                 System.out.println("Bye. Hope to see you again soon!");
@@ -34,38 +34,164 @@ public class Duke {
             }
 
             System.out.println(separator);
-            if (command.equals("list")) {
-                taskList.displayTasks();
-            } else if (command.startsWith("mark ")) {
-                int taskNumber = Integer.parseInt(command.substring("mark ".length()).trim());
-                Task task = taskList.markTaskAsDone(taskNumber);
-                System.out.println("Nice! I've marked this task as done:");
-                System.out.println("  " + task);
-            } else if (command.startsWith("unmark ")) {
-                int taskNumber = Integer.parseInt(command.substring("unmark ".length()).trim());
-                Task task = taskList.markTaskAsNotDone(taskNumber);
-                System.out.println("OK, I've marked this task as not done yet:");
-                System.out.println("  " + task);
-            } else if (command.startsWith("todo ")) {
-                String description = command.substring("todo ".length()).trim();
-                addTask(taskList, new Todo(description));
-            } else if (command.startsWith("deadline ")) {
-                String taskDetails = command.substring("deadline ".length()).trim();
-                int byIndex = taskDetails.indexOf(" /by ");
-                String description = taskDetails.substring(0, byIndex);
-                String by = taskDetails.substring(byIndex + " /by ".length());
-                addTask(taskList, new Deadline(description, by));
-            } else if (command.startsWith("event ")) {
-                String taskDetails = command.substring("event ".length()).trim();
-                int fromIndex = taskDetails.indexOf(" /from ");
-                int toIndex = taskDetails.indexOf(" /to ", fromIndex + " /from ".length());
-                String description = taskDetails.substring(0, fromIndex);
-                String from = taskDetails.substring(fromIndex + " /from ".length(), toIndex);
-                String to = taskDetails.substring(toIndex + " /to ".length());
-                addTask(taskList, new Event(description, from, to));
+            try {
+                handleCommand(command, taskList);
+            } catch (YqrException e) {
+                System.out.println(e.getMessage());
             }
             System.out.println(separator);
         }
+    }
+
+    /**
+     * Executes a command or reports invalid input using a {@link YqrException}.
+     *
+     * @param command command entered by the user
+     * @param taskList list on which the command operates
+     * @throws YqrException if the command or its arguments are invalid
+     */
+    private static void handleCommand(String command, TaskList taskList) throws YqrException {
+        String commandWord = command.split("\\s+", 2)[0];
+
+        switch (commandWord) {
+        case "list":
+            if (command.equals("list")) {
+                taskList.displayTasks();
+                return;
+            }
+            break;
+        case "mark":
+            markTask(command, taskList, true);
+            return;
+        case "unmark":
+            markTask(command, taskList, false);
+            return;
+        case "todo":
+            addTask(taskList, parseTodo(command));
+            return;
+        case "deadline":
+            addTask(taskList, parseDeadline(command));
+            return;
+        case "event":
+            addTask(taskList, parseEvent(command));
+            return;
+        default:
+            break;
+        }
+
+        throw new YqrException("Please input valid commands");
+    }
+
+    /**
+     * Creates a todo from a command after validating its description.
+     *
+     * @param command todo command entered by the user
+     * @return parsed todo
+     * @throws YqrException if the description is missing
+     */
+    private static Todo parseTodo(String command) throws YqrException {
+        String description = command.substring("todo".length()).trim();
+        if (description.isEmpty()) {
+            throw new YqrException("Please input task description");
+        }
+        return new Todo(description);
+    }
+
+    /**
+     * Creates a deadline from a command after validating its description and deadline.
+     *
+     * @param command deadline command entered by the user
+     * @return parsed deadline
+     * @throws YqrException if the description or deadline is missing
+     */
+    private static Deadline parseDeadline(String command) throws YqrException {
+        String taskDetails = command.substring("deadline".length()).trim();
+        if (taskDetails.isEmpty() || taskDetails.startsWith("/by")) {
+            throw new YqrException("Please input task description");
+        }
+
+        int byIndex = taskDetails.indexOf(" /by");
+        if (byIndex < 0) {
+            throw new YqrException("Please input the deadline");
+        }
+
+        String description = taskDetails.substring(0, byIndex).trim();
+        String by = taskDetails.substring(byIndex + " /by".length()).trim();
+        if (description.isEmpty()) {
+            throw new YqrException("Please input task description");
+        }
+        if (by.isEmpty()) {
+            throw new YqrException("Please input the deadline");
+        }
+        return new Deadline(description, by);
+    }
+
+    /**
+     * Creates an event from a command after validating its description and time details.
+     *
+     * @param command event command entered by the user
+     * @return parsed event
+     * @throws YqrException if the description or event times are missing
+     */
+    private static Event parseEvent(String command) throws YqrException {
+        String taskDetails = command.substring("event".length()).trim();
+        if (taskDetails.isEmpty()
+                || taskDetails.startsWith("/from")
+                || taskDetails.startsWith("/to")) {
+            throw new YqrException("Please input task description");
+        }
+
+        int fromIndex = taskDetails.indexOf(" /from");
+        if (fromIndex < 0) {
+            throw new YqrException("Please input the starting and ending details");
+        }
+
+        String description = taskDetails.substring(0, fromIndex).trim();
+        String timeDetails = taskDetails.substring(fromIndex + " /from".length()).trim();
+        int toIndex = timeDetails.indexOf(" /to");
+        if (toIndex < 0) {
+            throw new YqrException("Please input the starting and ending details");
+        }
+
+        String from = timeDetails.substring(0, toIndex).trim();
+        String to = timeDetails.substring(toIndex + " /to".length()).trim();
+        if (description.isEmpty()) {
+            throw new YqrException("Please input task description");
+        }
+        if (from.isEmpty() || to.isEmpty()) {
+            throw new YqrException("Please input the starting and ending details");
+        }
+        return new Event(description, from, to);
+    }
+
+    /**
+     * Marks or unmarks the task identified in a command.
+     *
+     * @param command mark or unmark command entered by the user
+     * @param taskList list containing the task
+     * @param isMark {@code true} to mark the task, or {@code false} to unmark it
+     * @throws YqrException if the task number is missing, invalid, or out of range
+     */
+    private static void markTask(String command, TaskList taskList, boolean isMark)
+            throws YqrException {
+        String commandWord = isMark ? "mark" : "unmark";
+        String numberText = command.substring(commandWord.length()).trim();
+        int taskNumber;
+        try {
+            taskNumber = Integer.parseInt(numberText);
+        } catch (NumberFormatException e) {
+            throw new YqrException("Please input a valid task number");
+        }
+
+        Task task;
+        if (isMark) {
+            task = taskList.markTaskAsDone(taskNumber);
+            System.out.println("Nice! I've marked this task as done:");
+        } else {
+            task = taskList.markTaskAsNotDone(taskNumber);
+            System.out.println("OK, I've marked this task as not done yet:");
+        }
+        System.out.println("  " + task);
     }
 
     /**
@@ -73,8 +199,9 @@ public class Duke {
      *
      * @param taskList list to which the task is added
      * @param task task to add
+     * @throws YqrException if the task list is full
      */
-    private static void addTask(TaskList taskList, Task task) {
+    private static void addTask(TaskList taskList, Task task) throws YqrException {
         taskList.addTask(task);
         System.out.println("Got it. I've added this task:");
         System.out.println("  " + task);
