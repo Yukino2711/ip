@@ -1,6 +1,14 @@
 import java.util.Scanner;
 
+/**
+ * Runs the yqr chatbot and handles commands entered by the user.
+ */
 public class Duke {
+    /**
+     * Starts the chatbot.
+     *
+     * @param args command-line arguments, which are not used
+     */
     public static void main(String[] args) {
         String separator = "____________________________________________________________";
         String banner = "+-------+\n"
@@ -14,6 +22,8 @@ public class Duke {
         System.out.println(separator);
 
         Scanner scanner = new Scanner(System.in);
+        TaskList taskList = new TaskList();
+
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine();
             if (command.equals("bye")) {
@@ -24,7 +34,12 @@ public class Duke {
             }
 
             System.out.println(separator);
-            System.out.println(command);
+            if (command.equals("list")) {
+                taskList.displayTasks();
+            } else {
+                taskList.addTask(command);
+                System.out.println("added: " + command);
+            }
             System.out.println(separator);
         }
     }
