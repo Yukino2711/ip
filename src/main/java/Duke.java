@@ -46,11 +46,40 @@ public class Duke {
                 Task task = taskList.markTaskAsNotDone(taskNumber);
                 System.out.println("OK, I've marked this task as not done yet:");
                 System.out.println("  " + task);
-            } else {
-                taskList.addTask(new Task(command));
-                System.out.println("added: " + command);
+            } else if (command.startsWith("todo ")) {
+                String description = command.substring("todo ".length()).trim();
+                addTask(taskList, new Todo(description));
+            } else if (command.startsWith("deadline ")) {
+                String taskDetails = command.substring("deadline ".length()).trim();
+                int byIndex = taskDetails.indexOf(" /by ");
+                String description = taskDetails.substring(0, byIndex);
+                String by = taskDetails.substring(byIndex + " /by ".length());
+                addTask(taskList, new Deadline(description, by));
+            } else if (command.startsWith("event ")) {
+                String taskDetails = command.substring("event ".length()).trim();
+                int fromIndex = taskDetails.indexOf(" /from ");
+                int toIndex = taskDetails.indexOf(" /to ", fromIndex + " /from ".length());
+                String description = taskDetails.substring(0, fromIndex);
+                String from = taskDetails.substring(fromIndex + " /from ".length(), toIndex);
+                String to = taskDetails.substring(toIndex + " /to ".length());
+                addTask(taskList, new Event(description, from, to));
             }
             System.out.println(separator);
         }
+    }
+
+    /**
+     * Adds a task and displays confirmation and the updated task count.
+     *
+     * @param taskList list to which the task is added
+     * @param task task to add
+     */
+    private static void addTask(TaskList taskList, Task task) {
+        taskList.addTask(task);
+        System.out.println("Got it. I've added this task:");
+        System.out.println("  " + task);
+        int taskCount = taskList.getTaskCount();
+        String taskWord = taskCount == 1 ? "task" : "tasks";
+        System.out.println("Now you have " + taskCount + " " + taskWord + " in the list.");
     }
 }

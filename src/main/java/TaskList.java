@@ -18,6 +18,15 @@ public class TaskList {
     }
 
     /**
+     * Returns the number of tasks currently stored.
+     *
+     * @return number of stored tasks
+     */
+    public int getTaskCount() {
+        return taskCount;
+    }
+
+    /**
      * Displays all stored tasks in numbered order.
      */
     public void displayTasks() {
