@@ -1,4 +1,6 @@
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 /**
@@ -144,7 +146,11 @@ public class Duke {
         if (by.isEmpty()) {
             throw new YqrException("Please input the deadline");
         }
-        return new Deadline(description, by);
+        try {
+            return new Deadline(description, LocalDate.parse(by));
+        } catch (DateTimeParseException e) {
+            throw new YqrException("Please input the deadline in yyyy-MM-dd format");
+        }
     }
 
     /**
