@@ -1,10 +1,26 @@
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Stores and displays the tasks entered by the user.
  */
 public class TaskList {
     private final ArrayList<Task> tasks = new ArrayList<>();
+
+    /**
+     * Creates an empty task list.
+     */
+    public TaskList() {
+    }
+
+    /**
+     * Creates a task list containing tasks loaded from storage.
+     *
+     * @param tasks tasks with which to initialise the list
+     */
+    public TaskList(List<Task> tasks) {
+        this.tasks.addAll(tasks);
+    }
 
     /**
      * Adds a task to the list.
@@ -22,6 +38,15 @@ public class TaskList {
      */
     public int getTaskCount() {
         return tasks.size();
+    }
+
+    /**
+     * Returns an unmodifiable snapshot of the stored tasks.
+     *
+     * @return snapshot of the tasks in this list
+     */
+    public List<Task> getTasks() {
+        return List.copyOf(tasks);
     }
 
     /**

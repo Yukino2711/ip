@@ -1,3 +1,4 @@
+import java.nio.file.Path;
 import java.util.Scanner;
 
 /**
@@ -22,7 +23,16 @@ public class Duke {
         System.out.println(separator);
 
         Scanner scanner = new Scanner(System.in);
-        TaskList taskList = new TaskList();
+        Storage storage = new Storage(Path.of("data", "yqr.txt"));
+        TaskList taskList;
+        try {
+            taskList = storage.loadTasks();
+        } catch (YqrException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Starting with an empty task list instead.");
+            System.out.println(separator);
+            taskList = new TaskList();
+        }
 
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine().trim();
@@ -35,7 +45,7 @@ public class Duke {
 
             System.out.println(separator);
             try {
-                handleCommand(command, taskList);
+                handleCommand(command, taskList, storage);
             } catch (YqrException e) {
                 System.out.println(e.getMessage());
             }
@@ -48,9 +58,11 @@ public class Duke {
      *
      * @param command command entered by the user
      * @param taskList list on which the command operates
-     * @throws YqrException if the command or its arguments are invalid
+     * @param storage storage used to save changes to the task list
+     * @throws YqrException if the command or its arguments are invalid, or saving fails
      */
-    private static void handleCommand(String command, TaskList taskList) throws YqrException {
+    private static void handleCommand(String command, TaskList taskList, Storage storage)
+            throws YqrException {
         String commandWord = command.split("\\s+", 2)[0];
 
         switch (commandWord) {
@@ -62,21 +74,27 @@ public class Duke {
             break;
         case "mark":
             markTask(command, taskList, true);
+            storage.saveTasks(taskList);
             return;
         case "unmark":
             markTask(command, taskList, false);
+            storage.saveTasks(taskList);
             return;
         case "delete":
             deleteTask(command, taskList);
+            storage.saveTasks(taskList);
             return;
         case "todo":
             addTask(taskList, parseTodo(command));
+            storage.saveTasks(taskList);
             return;
         case "deadline":
             addTask(taskList, parseDeadline(command));
+            storage.saveTasks(taskList);
             return;
         case "event":
             addTask(taskList, parseEvent(command));
+            storage.saveTasks(taskList);
             return;
         default:
             break;
