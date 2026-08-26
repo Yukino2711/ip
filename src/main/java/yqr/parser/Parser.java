@@ -7,6 +7,7 @@ import yqr.command.AddCommand;
 import yqr.command.Command;
 import yqr.command.DeleteCommand;
 import yqr.command.ExitCommand;
+import yqr.command.FindCommand;
 import yqr.command.ListCommand;
 import yqr.command.MarkCommand;
 import yqr.command.UnmarkCommand;
@@ -52,6 +53,8 @@ public class Parser {
                 return new AddCommand(parseDeadline(command));
             case "event":
                 return new AddCommand(parseEvent(command));
+            case "find":
+                return new FindCommand(parseFindKeyword(command));
             case "bye":
                 if (command.equals("bye")) {
                     return new ExitCommand();
@@ -158,6 +161,21 @@ public class Parser {
             throw new YqrException("Please input the starting and ending details");
         }
         return new Event(description, from, to);
+    }
+
+    /**
+     * Extracts and validates the keyword from a find command.
+     *
+     * @param command find command entered by the user.
+     * @return keyword to search for.
+     * @throws YqrException if the keyword is missing.
+     */
+    private static String parseFindKeyword(String command) throws YqrException {
+        String keyword = command.substring("find".length()).trim();
+        if (keyword.isEmpty()) {
+            throw new YqrException("Please input a keyword to search for");
+        }
+        return keyword;
     }
 
     /**
