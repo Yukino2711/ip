@@ -11,13 +11,13 @@ public class Deadline extends Task {
     private static final DateTimeFormatter DISPLAY_FORMAT =
             DateTimeFormatter.ofPattern("MMM dd yyyy", Locale.ENGLISH);
 
-    protected LocalDate by;
+    private final LocalDate by;
 
     /**
      * Creates an incomplete deadline task.
      *
-     * @param description description of the task
-     * @param by deadline date
+     * @param description description of the task.
+     * @param by deadline date.
      */
     public Deadline(String description, LocalDate by) {
         super(description);
@@ -27,7 +27,7 @@ public class Deadline extends Task {
     /**
      * Returns the deadline details.
      *
-     * @return deadline date
+     * @return deadline date.
      */
     public LocalDate getBy() {
         return by;
@@ -36,7 +36,7 @@ public class Deadline extends Task {
     /**
      * Returns a displayable version of this deadline task.
      *
-     * @return deadline type icon, task details, and deadline
+     * @return deadline type icon, task details, and deadline.
      */
     @Override
     public String toString() {

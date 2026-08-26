@@ -9,11 +9,17 @@ import yqr.ui.Ui;
  */
 public class ExitCommand extends Command {
     /**
+     * Creates a command that ends the chatbot session.
+     */
+    public ExitCommand() {
+    }
+
+    /**
      * Displays the farewell message.
      *
-     * @param tasks task list, which this command does not modify
-     * @param ui user interface used to display the farewell
-     * @param storage storage component, which this command does not modify
+     * @param tasks task list, which this command does not modify.
+     * @param ui user interface used to display the farewell.
+     * @param storage storage component, which this command does not modify.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
@@ -23,7 +29,7 @@ public class ExitCommand extends Command {
     /**
      * Indicates that the application should exit after this command.
      *
-     * @return {@code true}
+     * @return {@code true}.
      */
     @Override
     public boolean isExit() {

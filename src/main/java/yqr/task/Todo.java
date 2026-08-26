@@ -7,7 +7,7 @@ public class Todo extends Task {
     /**
      * Creates an incomplete todo task.
      *
-     * @param description description of the task
+     * @param description description of the task.
      */
     public Todo(String description) {
         super(description);
@@ -16,7 +16,7 @@ public class Todo extends Task {
     /**
      * Returns a displayable version of this todo task.
      *
-     * @return todo type icon, status icon, and description
+     * @return todo type icon, status icon, and description.
      */
     @Override
     public String toString() {

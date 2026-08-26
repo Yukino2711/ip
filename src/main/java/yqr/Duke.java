@@ -20,7 +20,7 @@ public class Duke {
     /**
      * Creates a chatbot that saves its tasks at the given file path.
      *
-     * @param filePath path of the task data file
+     * @param filePath path of the task data file.
      */
     public Duke(String filePath) {
         storage = new Storage(Path.of(filePath));
@@ -53,7 +53,7 @@ public class Duke {
     /**
      * Starts the chatbot using its default storage file.
      *
-     * @param args command-line arguments, which are not used
+     * @param args command-line arguments, which are not used.
      */
     public static void main(String[] args) {
         new Duke(Path.of("data", "yqr.txt").toString()).run();

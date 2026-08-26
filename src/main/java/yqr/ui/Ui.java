@@ -17,6 +17,12 @@ public class Ui {
 
     private final Scanner scanner = new Scanner(System.in);
 
+    /**
+     * Creates a user interface connected to standard input.
+     */
+    public Ui() {
+    }
+
     /** Displays the chatbot greeting. */
     public void showWelcome() {
         showLine();
@@ -29,7 +35,7 @@ public class Ui {
     /**
      * Returns whether another command can be read from standard input.
      *
-     * @return {@code true} if another command is available
+     * @return {@code true} if another command is available.
      */
     public boolean hasNextCommand() {
         return scanner.hasNextLine();
@@ -38,7 +44,7 @@ public class Ui {
     /**
      * Reads and trims the next command entered by the user.
      *
-     * @return next user command
+     * @return next user command.
      */
     public String readCommand() {
         return scanner.nextLine().trim();
@@ -52,7 +58,7 @@ public class Ui {
     /**
      * Displays an error encountered while loading saved tasks.
      *
-     * @param message explanation of the loading error
+     * @param message explanation of the loading error.
      */
     public void showLoadingError(String message) {
         System.out.println(message);
@@ -63,7 +69,7 @@ public class Ui {
     /**
      * Displays an error caused by a command or storage operation.
      *
-     * @param message explanation of the error
+     * @param message explanation of the error.
      */
     public void showError(String message) {
         System.out.println(message);
@@ -72,7 +78,7 @@ public class Ui {
     /**
      * Displays all tasks in numbered order.
      *
-     * @param tasks tasks to display
+     * @param tasks tasks to display.
      */
     public void showTaskList(List<Task> tasks) {
         System.out.println("Here are the tasks in your list:");
@@ -84,8 +90,8 @@ public class Ui {
     /**
      * Displays confirmation that a task was marked or unmarked.
      *
-     * @param task task whose status changed
-     * @param isMarked whether the task was marked as done
+     * @param task task whose status changed.
+     * @param isMarked whether the task was marked as done.
      */
     public void showTaskStatusChange(Task task, boolean isMarked) {
         if (isMarked) {
@@ -99,8 +105,8 @@ public class Ui {
     /**
      * Displays confirmation that a task was deleted and the new task count.
      *
-     * @param task deleted task
-     * @param taskCount number of tasks remaining
+     * @param task deleted task.
+     * @param taskCount number of tasks remaining.
      */
     public void showTaskDeleted(Task task, int taskCount) {
         System.out.println("Noted. I've removed this task:");
@@ -111,8 +117,8 @@ public class Ui {
     /**
      * Displays confirmation that a task was added and the new task count.
      *
-     * @param task added task
-     * @param taskCount number of tasks now stored
+     * @param task added task.
+     * @param taskCount number of tasks now stored.
      */
     public void showTaskAdded(Task task, int taskCount) {
         System.out.println("Got it. I've added this task:");
@@ -128,7 +134,7 @@ public class Ui {
     /**
      * Displays a task count with the correct singular or plural noun.
      *
-     * @param taskCount number of tasks to display
+     * @param taskCount number of tasks to display.
      */
     private void showTaskCount(int taskCount) {
         String taskWord = taskCount == 1 ? "task" : "tasks";
