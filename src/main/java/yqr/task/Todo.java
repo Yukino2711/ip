@@ -1,3 +1,5 @@
+package yqr.task;
+
 /**
  * Represents a task without an attached date or time.
  */

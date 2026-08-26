@@ -1,3 +1,11 @@
+package yqr.command;
+
+import yqr.exception.YqrException;
+import yqr.storage.Storage;
+import yqr.task.Task;
+import yqr.task.TaskList;
+import yqr.ui.Ui;
+
 /**
  * Deletes a task from the task list.
  */

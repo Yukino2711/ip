@@ -1,3 +1,5 @@
+package yqr.exception;
+
 /**
  * Represents an error caused by an invalid command entered in yqr.
  */
