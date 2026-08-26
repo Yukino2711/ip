@@ -1,0 +1,26 @@
+/**
+ * Ends the chatbot session.
+ */
+public class ExitCommand extends Command {
+    /**
+     * Displays the farewell message.
+     *
+     * @param tasks task list, which this command does not modify
+     * @param ui user interface used to display the farewell
+     * @param storage storage component, which this command does not modify
+     */
+    @Override
+    public void execute(TaskList tasks, Ui ui, Storage storage) {
+        ui.showGoodbye();
+    }
+
+    /**
+     * Indicates that the application should exit after this command.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public boolean isExit() {
+        return true;
+    }
+}
