@@ -1,3 +1,10 @@
+package yqr.command;
+
+import yqr.exception.YqrException;
+import yqr.storage.Storage;
+import yqr.task.TaskList;
+import yqr.ui.Ui;
+
 /**
  * Represents an instruction that can be executed by the chatbot.
  */

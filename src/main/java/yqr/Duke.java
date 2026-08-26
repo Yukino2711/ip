@@ -1,4 +1,13 @@
+package yqr;
+
 import java.nio.file.Path;
+
+import yqr.command.Command;
+import yqr.exception.YqrException;
+import yqr.parser.Parser;
+import yqr.storage.Storage;
+import yqr.task.TaskList;
+import yqr.ui.Ui;
 
 /**
  * Coordinates the yqr chatbot's user interface, task list, parser, and storage.
