@@ -4,15 +4,15 @@ package yqr.task;
  * Represents a task that takes place between specified start and end times.
  */
 public class Event extends Task {
-    protected String from;
-    protected String to;
+    private final String from;
+    private final String to;
 
     /**
      * Creates an incomplete event task.
      *
-     * @param description description of the event
-     * @param from start date or time as entered by the user
-     * @param to end date or time as entered by the user
+     * @param description description of the event.
+     * @param from start date or time as entered by the user.
+     * @param to end date or time as entered by the user.
      */
     public Event(String description, String from, String to) {
         super(description);
@@ -23,7 +23,7 @@ public class Event extends Task {
     /**
      * Returns the event's starting details.
      *
-     * @return start date or time as entered by the user
+     * @return start date or time as entered by the user.
      */
     public String getFrom() {
         return from;
@@ -32,7 +32,7 @@ public class Event extends Task {
     /**
      * Returns the event's ending details.
      *
-     * @return end date or time as entered by the user
+     * @return end date or time as entered by the user.
      */
     public String getTo() {
         return to;
@@ -41,7 +41,7 @@ public class Event extends Task {
     /**
      * Returns a displayable version of this event task.
      *
-     * @return event type icon, task details, and start and end times
+     * @return event type icon, task details, and start and end times.
      */
     @Override
     public String toString() {

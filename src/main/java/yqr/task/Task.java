@@ -4,13 +4,13 @@ package yqr.task;
  * Represents a task and whether it has been completed.
  */
 public class Task {
-    protected String description;
-    protected boolean isDone;
+    private final String description;
+    private boolean isDone;
 
     /**
      * Creates an incomplete task with the given description.
      *
-     * @param description description of the task
+     * @param description description of the task.
      */
     public Task(String description) {
         this.description = description;
@@ -34,7 +34,7 @@ public class Task {
     /**
      * Returns the task description.
      *
-     * @return task description
+     * @return task description.
      */
     public String getDescription() {
         return description;
@@ -43,7 +43,7 @@ public class Task {
     /**
      * Returns whether the task has been completed.
      *
-     * @return {@code true} if the task is completed
+     * @return {@code true} if the task is completed.
      */
     public boolean isDone() {
         return isDone;
@@ -52,7 +52,7 @@ public class Task {
     /**
      * Returns the character used to display this task's completion status.
      *
-     * @return {@code X} when completed, or a space otherwise
+     * @return {@code X} when completed, or a space otherwise.
      */
     public String getStatusIcon() {
         return isDone ? "X" : " ";
@@ -61,7 +61,7 @@ public class Task {
     /**
      * Returns a displayable version of this task.
      *
-     * @return status icon followed by the task description
+     * @return status icon followed by the task description.
      */
     @Override
     public String toString() {

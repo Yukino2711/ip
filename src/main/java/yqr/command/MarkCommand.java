@@ -15,7 +15,7 @@ public class MarkCommand extends Command {
     /**
      * Creates a command that marks a task as done.
      *
-     * @param taskNumber one-based number of the task to mark
+     * @param taskNumber one-based number of the task to mark.
      */
     public MarkCommand(int taskNumber) {
         this.taskNumber = taskNumber;
@@ -24,10 +24,10 @@ public class MarkCommand extends Command {
     /**
      * Marks the task, displays confirmation, and saves the updated list.
      *
-     * @param tasks task list containing the task
-     * @param ui user interface used to display confirmation
-     * @param storage storage used to save the updated list
-     * @throws YqrException if the task number is invalid or the list cannot be saved
+     * @param tasks task list containing the task.
+     * @param ui user interface used to display confirmation.
+     * @param storage storage used to save the updated list.
+     * @throws YqrException if the task number is invalid or the list cannot be saved.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws YqrException {

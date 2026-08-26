@@ -10,19 +10,25 @@ import yqr.ui.Ui;
  */
 public abstract class Command {
     /**
+     * Creates a command.
+     */
+    protected Command() {
+    }
+
+    /**
      * Executes this command using the application's components.
      *
-     * @param tasks task list on which the command operates
-     * @param ui user interface used to display the result
-     * @param storage storage used to persist changes
-     * @throws YqrException if the command cannot be completed
+     * @param tasks task list on which the command operates.
+     * @param ui user interface used to display the result.
+     * @param storage storage used to persist changes.
+     * @throws YqrException if the command cannot be completed.
      */
     public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws YqrException;
 
     /**
      * Returns whether this command should end the application.
      *
-     * @return {@code true} if the application should exit
+     * @return {@code true} if the application should exit.
      */
     public boolean isExit() {
         return false;

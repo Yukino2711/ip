@@ -26,7 +26,7 @@ public class Storage {
     /**
      * Creates storage that reads from and writes to the given path.
      *
-     * @param filePath relative path of the task data file
+     * @param filePath relative path of the task data file.
      */
     public Storage(Path filePath) {
         this.filePath = filePath;
@@ -35,8 +35,8 @@ public class Storage {
     /**
      * Loads all tasks from the data file. A missing file represents an empty list.
      *
-     * @return task list reconstructed from the data file
-     * @throws YqrException if the file cannot be read or contains invalid data
+     * @return task list reconstructed from the data file.
+     * @throws YqrException if the file cannot be read or contains invalid data.
      */
     public TaskList loadTasks() throws YqrException {
         if (Files.notExists(filePath)) {
@@ -45,7 +45,7 @@ public class Storage {
 
         try {
             List<String> lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
-            ArrayList<Task> tasks = new ArrayList<>();
+            List<Task> tasks = new ArrayList<>();
             for (int i = 0; i < lines.size(); i++) {
                 String line = lines.get(i);
                 if (!line.isBlank()) {
@@ -61,8 +61,8 @@ public class Storage {
     /**
      * Saves the current task list, creating its parent directory when necessary.
      *
-     * @param taskList task list to save
-     * @throws YqrException if the data file cannot be written
+     * @param taskList task list to save.
+     * @throws YqrException if the data file cannot be written.
      */
     public void saveTasks(TaskList taskList) throws YqrException {
         try {
@@ -71,7 +71,7 @@ public class Storage {
                 Files.createDirectories(parentDirectory);
             }
 
-            ArrayList<String> lines = new ArrayList<>();
+            List<String> lines = new ArrayList<>();
             for (Task task : taskList.getTasks()) {
                 lines.add(formatTask(task));
             }
@@ -84,8 +84,8 @@ public class Storage {
     /**
      * Converts a task into one line of the storage format.
      *
-     * @param task task to convert
-     * @return serialized task
+     * @param task task to convert.
+     * @return serialized task.
      */
     private String formatTask(Task task) {
         String status = task.isDone() ? "1" : "0";
@@ -105,10 +105,10 @@ public class Storage {
     /**
      * Reconstructs one task from a line of stored data.
      *
-     * @param line serialized task
-     * @param lineNumber line number used when reporting malformed data
-     * @return reconstructed task
-     * @throws YqrException if the line is malformed
+     * @param line serialized task.
+     * @param lineNumber line number used when reporting malformed data.
+     * @return reconstructed task.
+     * @throws YqrException if the line is malformed.
      */
     private Task parseTask(String line, int lineNumber) throws YqrException {
         String[] fields = line.split(" \\| ", -1);
@@ -118,30 +118,30 @@ public class Storage {
 
         Task task;
         switch (fields[0]) {
-        case "T":
-            if (fields.length != 3) {
+            case "T":
+                if (fields.length != 3) {
+                    throw invalidData(lineNumber);
+                }
+                task = new Todo(fields[2]);
+                break;
+            case "D":
+                if (fields.length != 4) {
+                    throw invalidData(lineNumber);
+                }
+                try {
+                    task = new Deadline(fields[2], LocalDate.parse(fields[3]));
+                } catch (DateTimeParseException e) {
+                    throw invalidData(lineNumber);
+                }
+                break;
+            case "E":
+                if (fields.length != 5) {
+                    throw invalidData(lineNumber);
+                }
+                task = new Event(fields[2], fields[3], fields[4]);
+                break;
+            default:
                 throw invalidData(lineNumber);
-            }
-            task = new Todo(fields[2]);
-            break;
-        case "D":
-            if (fields.length != 4) {
-                throw invalidData(lineNumber);
-            }
-            try {
-                task = new Deadline(fields[2], LocalDate.parse(fields[3]));
-            } catch (DateTimeParseException e) {
-                throw invalidData(lineNumber);
-            }
-            break;
-        case "E":
-            if (fields.length != 5) {
-                throw invalidData(lineNumber);
-            }
-            task = new Event(fields[2], fields[3], fields[4]);
-            break;
-        default:
-            throw invalidData(lineNumber);
         }
 
         if (fields[1].equals("1")) {
@@ -155,8 +155,8 @@ public class Storage {
     /**
      * Creates a consistent error for a malformed line in the data file.
      *
-     * @param lineNumber number of the malformed line
-     * @return exception describing the malformed data
+     * @param lineNumber number of the malformed line.
+     * @return exception describing the malformed data.
      */
     private YqrException invalidData(int lineNumber) {
         return new YqrException("Invalid saved task on line " + lineNumber);

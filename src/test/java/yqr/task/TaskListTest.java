@@ -250,7 +250,7 @@ class TaskListTest {
     /**
      * Asserts that an operation fails because its task number is outside the list.
      *
-     * @param operation operation expected to reject its task number
+     * @param operation operation expected to reject its task number.
      */
     private static void assertInvalidTaskNumber(TaskListOperation operation) {
         YqrException exception = assertThrows(YqrException.class, operation::execute);

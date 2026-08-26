@@ -26,39 +26,39 @@ public class Parser {
     /**
      * Parses a full user command into a command that can be executed.
      *
-     * @param fullCommand command entered by the user
-     * @return command corresponding to the user input
-     * @throws YqrException if the command or its arguments are invalid
+     * @param fullCommand command entered by the user.
+     * @return command corresponding to the user input.
+     * @throws YqrException if the command or its arguments are invalid.
      */
     public static Command parse(String fullCommand) throws YqrException {
         String command = fullCommand.trim();
         String commandWord = getCommandWord(command);
 
         switch (commandWord) {
-        case "list":
-            if (command.equals("list")) {
-                return new ListCommand();
-            }
-            break;
-        case "mark":
-            return new MarkCommand(parseTaskNumber(command, "mark"));
-        case "unmark":
-            return new UnmarkCommand(parseTaskNumber(command, "unmark"));
-        case "delete":
-            return new DeleteCommand(parseTaskNumber(command, "delete"));
-        case "todo":
-            return new AddCommand(parseTodo(command));
-        case "deadline":
-            return new AddCommand(parseDeadline(command));
-        case "event":
-            return new AddCommand(parseEvent(command));
-        case "bye":
-            if (command.equals("bye")) {
-                return new ExitCommand();
-            }
-            break;
-        default:
-            break;
+            case "list":
+                if (command.equals("list")) {
+                    return new ListCommand();
+                }
+                break;
+            case "mark":
+                return new MarkCommand(parseTaskNumber(command, "mark"));
+            case "unmark":
+                return new UnmarkCommand(parseTaskNumber(command, "unmark"));
+            case "delete":
+                return new DeleteCommand(parseTaskNumber(command, "delete"));
+            case "todo":
+                return new AddCommand(parseTodo(command));
+            case "deadline":
+                return new AddCommand(parseDeadline(command));
+            case "event":
+                return new AddCommand(parseEvent(command));
+            case "bye":
+                if (command.equals("bye")) {
+                    return new ExitCommand();
+                }
+                break;
+            default:
+                break;
         }
 
         throw new YqrException("Please input valid commands");
@@ -67,8 +67,8 @@ public class Parser {
     /**
      * Returns the first word of a command, which identifies the requested operation.
      *
-     * @param command command entered by the user
-     * @return command word, or an empty string when the command is empty
+     * @param command command entered by the user.
+     * @return command word, or an empty string when the command is empty.
      */
     private static String getCommandWord(String command) {
         return command.isEmpty() ? "" : command.split("\\s+", 2)[0];
@@ -77,9 +77,9 @@ public class Parser {
     /**
      * Creates a todo from a command after validating its description.
      *
-     * @param command todo command entered by the user
-     * @return parsed todo
-     * @throws YqrException if the description is missing
+     * @param command todo command entered by the user.
+     * @return parsed todo.
+     * @throws YqrException if the description is missing.
      */
     private static Todo parseTodo(String command) throws YqrException {
         String description = command.substring("todo".length()).trim();
@@ -92,9 +92,9 @@ public class Parser {
     /**
      * Creates a deadline from a command after validating its description and deadline.
      *
-     * @param command deadline command entered by the user
-     * @return parsed deadline
-     * @throws YqrException if the description or deadline is missing or invalid
+     * @param command deadline command entered by the user.
+     * @return parsed deadline.
+     * @throws YqrException if the description or deadline is missing or invalid.
      */
     private static Deadline parseDeadline(String command) throws YqrException {
         String taskDetails = command.substring("deadline".length()).trim();
@@ -125,9 +125,9 @@ public class Parser {
     /**
      * Creates an event from a command after validating its description and time details.
      *
-     * @param command event command entered by the user
-     * @return parsed event
-     * @throws YqrException if the description or event times are missing
+     * @param command event command entered by the user.
+     * @return parsed event.
+     * @throws YqrException if the description or event times are missing.
      */
     private static Event parseEvent(String command) throws YqrException {
         String taskDetails = command.substring("event".length()).trim();
@@ -163,10 +163,10 @@ public class Parser {
     /**
      * Extracts a task number from a command.
      *
-     * @param command command containing a task number
-     * @param commandWord command word to remove before parsing
-     * @return parsed task number
-     * @throws YqrException if the task number is missing or not an integer
+     * @param command command containing a task number.
+     * @param commandWord command word to remove before parsing.
+     * @return parsed task number.
+     * @throws YqrException if the task number is missing or not an integer.
      */
     private static int parseTaskNumber(String command, String commandWord) throws YqrException {
         String numberText = command.substring(commandWord.length()).trim();
