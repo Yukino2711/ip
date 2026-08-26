@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Stores and displays the tasks entered by the user.
+ * Stores the tasks entered by the user and provides operations on them.
  */
 public class TaskList {
     private final ArrayList<Task> tasks = new ArrayList<>();
@@ -47,16 +47,6 @@ public class TaskList {
      */
     public List<Task> getTasks() {
         return List.copyOf(tasks);
-    }
-
-    /**
-     * Displays all stored tasks in numbered order.
-     */
-    public void displayTasks() {
-        System.out.println("Here are the tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i));
-        }
     }
 
     /**
