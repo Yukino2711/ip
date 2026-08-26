@@ -49,6 +49,11 @@ jar {
 
 shadowJar {
     archiveFileName = 'duke.jar'
+    // Preserve service-provider declarations when dependencies contribute them.
+    mergeServiceFiles()
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
 }
 
 run {
