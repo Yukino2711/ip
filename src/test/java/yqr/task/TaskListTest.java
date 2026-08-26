@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -68,6 +69,48 @@ class TaskListTest {
                 () -> assertThrows(UnsupportedOperationException.class,
                         () -> snapshot.add(secondTask)),
                 () -> assertIterableEquals(List.of(firstTask, secondTask), taskList.getTasks()));
+    }
+
+    @Test
+    void findTasks_keywordInMultipleDescriptions_matchingTasksReturnedInOriginalOrder() {
+        Task firstMatch = new Todo("read book");
+        Task nonMatch = new Todo("buy groceries");
+        Task secondMatch = new Deadline("return book", LocalDate.of(2026, 9, 1));
+        TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
+
+        List<Task> matchingTasks = taskList.findTasks("book");
+
+        assertIterableEquals(List.of(firstMatch, secondMatch), matchingTasks);
+    }
+
+    @Test
+    void findTasks_keywordIsPartialWord_matchingTaskReturned() {
+        Task matchingTask = new Todo("read textbook");
+        TaskList taskList = new TaskList(List.of(matchingTask, new Todo("write notes")));
+
+        List<Task> matchingTasks = taskList.findTasks("text");
+
+        assertIterableEquals(List.of(matchingTask), matchingTasks);
+    }
+
+    @Test
+    void findTasks_keywordOnlyInTaskMetadata_noTasksReturned() {
+        Task deadline = new Deadline("return item", LocalDate.of(2026, 9, 1));
+        Task event = new Event("team meeting", "book room", "leave room");
+        TaskList taskList = new TaskList(List.of(deadline, event));
+
+        List<Task> matchingTasks = taskList.findTasks("book");
+
+        assertIterableEquals(List.of(), matchingTasks);
+    }
+
+    @Test
+    void findTasks_noMatchingDescriptions_emptyListReturned() {
+        TaskList taskList = new TaskList(List.of(new Todo("read book")));
+
+        List<Task> matchingTasks = taskList.findTasks("groceries");
+
+        assertIterableEquals(List.of(), matchingTasks);
     }
 
     @Test
