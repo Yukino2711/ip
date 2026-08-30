@@ -1,6 +1,5 @@
 package yqr.task;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
@@ -28,9 +27,8 @@ class TaskListTest {
 
         taskList.addTask(task);
 
-        assertAll(
-                () -> assertEquals(1, taskList.getTaskCount()),
-                () -> assertIterableEquals(List.of(task), taskList.getTasks()));
+        assertEquals(1, taskList.getTaskCount());
+        assertIterableEquals(List.of(task), taskList.getTasks());
     }
 
     @Test
@@ -50,9 +48,8 @@ class TaskListTest {
         TaskList populatedTaskList = new TaskList(List.of(
                 new Todo("first"), new Todo("second"), new Todo("third")));
 
-        assertAll(
-                () -> assertEquals(0, emptyTaskList.getTaskCount()),
-                () -> assertEquals(3, populatedTaskList.getTaskCount()));
+        assertEquals(0, emptyTaskList.getTaskCount());
+        assertEquals(3, populatedTaskList.getTaskCount());
     }
 
     @Test
@@ -64,11 +61,9 @@ class TaskListTest {
 
         taskList.addTask(secondTask);
 
-        assertAll(
-                () -> assertIterableEquals(List.of(firstTask), snapshot),
-                () -> assertThrows(UnsupportedOperationException.class,
-                        () -> snapshot.add(secondTask)),
-                () -> assertIterableEquals(List.of(firstTask, secondTask), taskList.getTasks()));
+        assertIterableEquals(List.of(firstTask), snapshot);
+        assertThrows(UnsupportedOperationException.class, () -> snapshot.add(secondTask));
+        assertIterableEquals(List.of(firstTask, secondTask), taskList.getTasks());
     }
 
     @Test
@@ -122,13 +117,11 @@ class TaskListTest {
 
         Task markedTask = taskList.markTaskAsDone(2);
 
-        assertAll(
-                () -> assertSame(targetTask, markedTask),
-                () -> assertTrue(targetTask.isDone()),
-                () -> assertFalse(firstTask.isDone()),
-                () -> assertFalse(thirdTask.isDone()),
-                () -> assertIterableEquals(List.of(firstTask, targetTask, thirdTask),
-                        taskList.getTasks()));
+        assertSame(targetTask, markedTask);
+        assertTrue(targetTask.isDone());
+        assertFalse(firstTask.isDone());
+        assertFalse(thirdTask.isDone());
+        assertIterableEquals(List.of(firstTask, targetTask, thirdTask), taskList.getTasks());
     }
 
     @Test
@@ -139,9 +132,8 @@ class TaskListTest {
 
         Task markedTask = taskList.markTaskAsDone(1);
 
-        assertAll(
-                () -> assertSame(task, markedTask),
-                () -> assertTrue(task.isDone()));
+        assertSame(task, markedTask);
+        assertTrue(task.isDone());
     }
 
     @Test
@@ -149,11 +141,10 @@ class TaskListTest {
         TaskList emptyTaskList = new TaskList();
         TaskList taskList = new TaskList(List.of(new Todo("task")));
 
-        assertAll(
-                () -> assertInvalidTaskNumber(() -> emptyTaskList.markTaskAsDone(1)),
-                () -> assertInvalidTaskNumber(() -> taskList.markTaskAsDone(-1)),
-                () -> assertInvalidTaskNumber(() -> taskList.markTaskAsDone(0)),
-                () -> assertInvalidTaskNumber(() -> taskList.markTaskAsDone(2)));
+        assertInvalidTaskNumber(() -> emptyTaskList.markTaskAsDone(1));
+        assertInvalidTaskNumber(() -> taskList.markTaskAsDone(-1));
+        assertInvalidTaskNumber(() -> taskList.markTaskAsDone(0));
+        assertInvalidTaskNumber(() -> taskList.markTaskAsDone(2));
     }
 
     @Test
@@ -166,13 +157,11 @@ class TaskListTest {
 
         Task unmarkedTask = taskList.markTaskAsNotDone(2);
 
-        assertAll(
-                () -> assertSame(targetTask, unmarkedTask),
-                () -> assertFalse(targetTask.isDone()),
-                () -> assertFalse(firstTask.isDone()),
-                () -> assertFalse(thirdTask.isDone()),
-                () -> assertIterableEquals(List.of(firstTask, targetTask, thirdTask),
-                        taskList.getTasks()));
+        assertSame(targetTask, unmarkedTask);
+        assertFalse(targetTask.isDone());
+        assertFalse(firstTask.isDone());
+        assertFalse(thirdTask.isDone());
+        assertIterableEquals(List.of(firstTask, targetTask, thirdTask), taskList.getTasks());
     }
 
     @Test
@@ -182,9 +171,8 @@ class TaskListTest {
 
         Task unmarkedTask = taskList.markTaskAsNotDone(1);
 
-        assertAll(
-                () -> assertSame(task, unmarkedTask),
-                () -> assertFalse(task.isDone()));
+        assertSame(task, unmarkedTask);
+        assertFalse(task.isDone());
     }
 
     @Test
@@ -192,11 +180,10 @@ class TaskListTest {
         TaskList emptyTaskList = new TaskList();
         TaskList taskList = new TaskList(List.of(new Todo("task")));
 
-        assertAll(
-                () -> assertInvalidTaskNumber(() -> emptyTaskList.markTaskAsNotDone(1)),
-                () -> assertInvalidTaskNumber(() -> taskList.markTaskAsNotDone(-1)),
-                () -> assertInvalidTaskNumber(() -> taskList.markTaskAsNotDone(0)),
-                () -> assertInvalidTaskNumber(() -> taskList.markTaskAsNotDone(2)));
+        assertInvalidTaskNumber(() -> emptyTaskList.markTaskAsNotDone(1));
+        assertInvalidTaskNumber(() -> taskList.markTaskAsNotDone(-1));
+        assertInvalidTaskNumber(() -> taskList.markTaskAsNotDone(0));
+        assertInvalidTaskNumber(() -> taskList.markTaskAsNotDone(2));
     }
 
     @Test
@@ -206,10 +193,9 @@ class TaskListTest {
 
         Task deletedTask = taskList.deleteTask(1);
 
-        assertAll(
-                () -> assertSame(onlyTask, deletedTask),
-                () -> assertEquals(0, taskList.getTaskCount()),
-                () -> assertIterableEquals(List.of(), taskList.getTasks()));
+        assertSame(onlyTask, deletedTask);
+        assertEquals(0, taskList.getTaskCount());
+        assertIterableEquals(List.of(), taskList.getTasks());
     }
 
     @Test
@@ -221,9 +207,8 @@ class TaskListTest {
 
         Task deletedTask = taskList.deleteTask(1);
 
-        assertAll(
-                () -> assertSame(firstTask, deletedTask),
-                () -> assertIterableEquals(List.of(secondTask, thirdTask), taskList.getTasks()));
+        assertSame(firstTask, deletedTask);
+        assertIterableEquals(List.of(secondTask, thirdTask), taskList.getTasks());
     }
 
     @Test
@@ -235,9 +220,8 @@ class TaskListTest {
 
         Task deletedTask = taskList.deleteTask(2);
 
-        assertAll(
-                () -> assertSame(secondTask, deletedTask),
-                () -> assertIterableEquals(List.of(firstTask, thirdTask), taskList.getTasks()));
+        assertSame(secondTask, deletedTask);
+        assertIterableEquals(List.of(firstTask, thirdTask), taskList.getTasks());
     }
 
     @Test
@@ -249,9 +233,8 @@ class TaskListTest {
 
         Task deletedTask = taskList.deleteTask(3);
 
-        assertAll(
-                () -> assertSame(thirdTask, deletedTask),
-                () -> assertIterableEquals(List.of(firstTask, secondTask), taskList.getTasks()));
+        assertSame(thirdTask, deletedTask);
+        assertIterableEquals(List.of(firstTask, secondTask), taskList.getTasks());
     }
 
     @Test

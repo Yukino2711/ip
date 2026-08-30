@@ -32,8 +32,7 @@ class ParserTest {
 
     @Test
     void parse_findWithWhitespaceOnlyKeyword_exceptionThrown() {
-        YqrException exception = assertThrows(YqrException.class,
-                () -> Parser.parse("find     "));
+        YqrException exception = assertThrows(YqrException.class, () -> Parser.parse("find     "));
 
         assertEquals(MISSING_KEYWORD_MESSAGE, exception.getMessage());
     }
