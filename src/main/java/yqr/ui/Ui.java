@@ -41,9 +41,7 @@ public class Ui {
     /** Displays the chatbot greeting. */
     public void showWelcome() {
         showLine();
-        output.accept(BANNER);
-        output.accept("Hello! I'm yqr.");
-        output.accept("What can I do for you?");
+        showLines(BANNER, "Hello! I'm yqr.", "What can I do for you?");
         showLine();
     }
 
@@ -73,7 +71,7 @@ public class Ui {
 
     /** Displays the chatbot farewell. */
     public void showGoodbye() {
-        output.accept("Bye. Hope to see you again soon!");
+        showLines("Bye. Hope to see you again soon!");
     }
 
     /**
@@ -82,8 +80,7 @@ public class Ui {
      * @param message explanation of the loading error.
      */
     public void showLoadingError(String message) {
-        output.accept(message);
-        output.accept("Starting with an empty task list instead.");
+        showLines(message, "Starting with an empty task list instead.");
         showLine();
     }
 
@@ -93,7 +90,7 @@ public class Ui {
      * @param message explanation of the error.
      */
     public void showError(String message) {
-        output.accept(message);
+        showLines(message);
     }
 
     /**
@@ -102,9 +99,9 @@ public class Ui {
      * @param tasks tasks to display.
      */
     public void showTaskList(List<Task> tasks) {
-        output.accept("Here are the tasks in your list:");
+        showLines("Here are the tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
-            output.accept((i + 1) + "." + tasks.get(i));
+            showLines((i + 1) + "." + tasks.get(i));
         }
     }
 
@@ -114,9 +111,9 @@ public class Ui {
      * @param tasks matching tasks to display.
      */
     public void showMatchingTasks(List<Task> tasks) {
-        output.accept("Here are the matching tasks in your list:");
+        showLines("Here are the matching tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
-            output.accept((i + 1) + "." + tasks.get(i));
+            showLines((i + 1) + "." + tasks.get(i));
         }
     }
 
@@ -127,12 +124,13 @@ public class Ui {
      * @param isMarked whether the task was marked as done.
      */
     public void showTaskStatusChange(Task task, boolean isMarked) {
+        String message;
         if (isMarked) {
-            output.accept("Nice! I've marked this task as done:");
+            message = "Nice! I've marked this task as done:";
         } else {
-            output.accept("OK, I've marked this task as not done yet:");
+            message = "OK, I've marked this task as not done yet:";
         }
-        output.accept("  " + task);
+        showLines(message, "  " + task);
     }
 
     /**
@@ -142,8 +140,7 @@ public class Ui {
      * @param taskCount number of tasks remaining.
      */
     public void showTaskDeleted(Task task, int taskCount) {
-        output.accept("Noted. I've removed this task:");
-        output.accept("  " + task);
+        showLines("Noted. I've removed this task:", "  " + task);
         showTaskCount(taskCount);
     }
 
@@ -154,14 +151,13 @@ public class Ui {
      * @param taskCount number of tasks now stored.
      */
     public void showTaskAdded(Task task, int taskCount) {
-        output.accept("Got it. I've added this task:");
-        output.accept("  " + task);
+        showLines("Got it. I've added this task:", "  " + task);
         showTaskCount(taskCount);
     }
 
     /** Displays the line separating command responses. */
     public void showLine() {
-        output.accept(SEPARATOR);
+        showLines(SEPARATOR);
     }
 
     /**
@@ -171,6 +167,17 @@ public class Ui {
      */
     private void showTaskCount(int taskCount) {
         String taskWord = taskCount == 1 ? "task" : "tasks";
-        output.accept("Now you have " + taskCount + " " + taskWord + " in the list.");
+        showLines("Now you have " + taskCount + " " + taskWord + " in the list.");
+    }
+
+    /**
+     * Sends any number of lines to the configured output in their given order.
+     *
+     * @param lines lines to display.
+     */
+    private void showLines(String... lines) {
+        for (String line : lines) {
+            output.accept(line);
+        }
     }
 }
