@@ -1,7 +1,9 @@
 package yqr.ui;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 import yqr.task.Task;
 
@@ -15,20 +17,33 @@ public class Ui {
             + "|  yqr  |\n"
             + "+-------+";
 
-    private final Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner;
+    private final Consumer<String> output;
 
     /**
      * Creates a user interface connected to standard input.
      */
     public Ui() {
+        scanner = new Scanner(System.in);
+        output = System.out::println;
+    }
+
+    /**
+     * Creates an output-only user interface that sends each displayed line to a consumer.
+     *
+     * @param output consumer that receives displayed lines.
+     */
+    public Ui(Consumer<String> output) {
+        scanner = null;
+        this.output = Objects.requireNonNull(output);
     }
 
     /** Displays the chatbot greeting. */
     public void showWelcome() {
         showLine();
-        System.out.println(BANNER);
-        System.out.println("Hello! I'm yqr.");
-        System.out.println("What can I do for you?");
+        output.accept(BANNER);
+        output.accept("Hello! I'm yqr.");
+        output.accept("What can I do for you?");
         showLine();
     }
 
@@ -38,6 +53,9 @@ public class Ui {
      * @return {@code true} if another command is available.
      */
     public boolean hasNextCommand() {
+        if (scanner == null) {
+            return false;
+        }
         return scanner.hasNextLine();
     }
 
@@ -47,12 +65,15 @@ public class Ui {
      * @return next user command.
      */
     public String readCommand() {
+        if (scanner == null) {
+            throw new IllegalStateException("This user interface has no input source");
+        }
         return scanner.nextLine().trim();
     }
 
     /** Displays the chatbot farewell. */
     public void showGoodbye() {
-        System.out.println("Bye. Hope to see you again soon!");
+        output.accept("Bye. Hope to see you again soon!");
     }
 
     /**
@@ -61,8 +82,8 @@ public class Ui {
      * @param message explanation of the loading error.
      */
     public void showLoadingError(String message) {
-        System.out.println(message);
-        System.out.println("Starting with an empty task list instead.");
+        output.accept(message);
+        output.accept("Starting with an empty task list instead.");
         showLine();
     }
 
@@ -72,7 +93,7 @@ public class Ui {
      * @param message explanation of the error.
      */
     public void showError(String message) {
-        System.out.println(message);
+        output.accept(message);
     }
 
     /**
@@ -81,9 +102,9 @@ public class Ui {
      * @param tasks tasks to display.
      */
     public void showTaskList(List<Task> tasks) {
-        System.out.println("Here are the tasks in your list:");
+        output.accept("Here are the tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i));
+            output.accept((i + 1) + "." + tasks.get(i));
         }
     }
 
@@ -93,9 +114,9 @@ public class Ui {
      * @param tasks matching tasks to display.
      */
     public void showMatchingTasks(List<Task> tasks) {
-        System.out.println("Here are the matching tasks in your list:");
+        output.accept("Here are the matching tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i));
+            output.accept((i + 1) + "." + tasks.get(i));
         }
     }
 
@@ -107,11 +128,11 @@ public class Ui {
      */
     public void showTaskStatusChange(Task task, boolean isMarked) {
         if (isMarked) {
-            System.out.println("Nice! I've marked this task as done:");
+            output.accept("Nice! I've marked this task as done:");
         } else {
-            System.out.println("OK, I've marked this task as not done yet:");
+            output.accept("OK, I've marked this task as not done yet:");
         }
-        System.out.println("  " + task);
+        output.accept("  " + task);
     }
 
     /**
@@ -121,8 +142,8 @@ public class Ui {
      * @param taskCount number of tasks remaining.
      */
     public void showTaskDeleted(Task task, int taskCount) {
-        System.out.println("Noted. I've removed this task:");
-        System.out.println("  " + task);
+        output.accept("Noted. I've removed this task:");
+        output.accept("  " + task);
         showTaskCount(taskCount);
     }
 
@@ -133,14 +154,14 @@ public class Ui {
      * @param taskCount number of tasks now stored.
      */
     public void showTaskAdded(Task task, int taskCount) {
-        System.out.println("Got it. I've added this task:");
-        System.out.println("  " + task);
+        output.accept("Got it. I've added this task:");
+        output.accept("  " + task);
         showTaskCount(taskCount);
     }
 
     /** Displays the line separating command responses. */
     public void showLine() {
-        System.out.println(SEPARATOR);
+        output.accept(SEPARATOR);
     }
 
     /**
@@ -150,6 +171,6 @@ public class Ui {
      */
     private void showTaskCount(int taskCount) {
         String taskWord = taskCount == 1 ? "task" : "tasks";
-        System.out.println("Now you have " + taskCount + " " + taskWord + " in the list.");
+        output.accept("Now you have " + taskCount + " " + taskWord + " in the list.");
     }
 }
