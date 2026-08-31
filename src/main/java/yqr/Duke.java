@@ -1,6 +1,8 @@
 package yqr;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import yqr.command.Command;
 import yqr.exception.YqrException;
@@ -13,9 +15,21 @@ import yqr.ui.Ui;
  * Coordinates the yqr chatbot's user interface, task list, parser, and storage.
  */
 public class Duke {
+    private static final String DEFAULT_FILE_PATH = Path.of("data", "yqr.txt").toString();
+    private static final String WELCOME_MESSAGE = "Hello! I'm yqr.\nWhat can I do for you?";
+
     private final Storage storage;
     private final Ui ui;
     private TaskList taskList;
+    private boolean hasExited;
+    private String loadingMessage = "";
+
+    /**
+     * Creates a chatbot that uses the default storage file.
+     */
+    public Duke() {
+        this(DEFAULT_FILE_PATH);
+    }
 
     /**
      * Creates a chatbot that saves its tasks at the given file path.
@@ -25,6 +39,7 @@ public class Duke {
     public Duke(String filePath) {
         storage = new Storage(Path.of(filePath));
         ui = new Ui();
+        loadTasks();
     }
 
     /**
@@ -32,16 +47,14 @@ public class Duke {
      */
     public void run() {
         ui.showWelcome();
-        loadTasks();
 
-        boolean isExit = false;
-        while (!isExit && ui.hasNextCommand()) {
+        while (!hasExited && ui.hasNextCommand()) {
             try {
                 String fullCommand = ui.readCommand();
                 ui.showLine();
                 Command command = Parser.parse(fullCommand);
                 command.execute(taskList, ui, storage);
-                isExit = command.isExit();
+                hasExited = command.isExit();
             } catch (YqrException e) {
                 ui.showError(e.getMessage());
             } finally {
@@ -56,7 +69,51 @@ public class Duke {
      * @param args command-line arguments, which are not used.
      */
     public static void main(String[] args) {
-        new Duke(Path.of("data", "yqr.txt").toString()).run();
+        new Duke().run();
+    }
+
+    /**
+     * Executes one user command and returns the lines displayed by the chatbot.
+     *
+     * @param input command entered by the user.
+     * @return chatbot response, with multiple lines joined by newline characters.
+     */
+    public String getResponse(String input) {
+        if (hasExited) {
+            return "This session has ended. Restart yqr to enter more commands.";
+        }
+
+        List<String> responseLines = new ArrayList<>();
+        Ui responseUi = new Ui(responseLines::add);
+        try {
+            Command command = Parser.parse(input);
+            command.execute(taskList, responseUi, storage);
+            hasExited = command.isExit();
+        } catch (YqrException e) {
+            responseUi.showError(e.getMessage());
+        }
+        return String.join("\n", responseLines);
+    }
+
+    /**
+     * Returns the greeting shown when the GUI opens.
+     *
+     * @return greeting, preceded by a loading warning when saved tasks could not be loaded.
+     */
+    public String getWelcomeMessage() {
+        if (loadingMessage.isEmpty()) {
+            return WELCOME_MESSAGE;
+        }
+        return loadingMessage + "\n\n" + WELCOME_MESSAGE;
+    }
+
+    /**
+     * Returns whether the user has entered the exit command.
+     *
+     * @return {@code true} after a successful {@code bye} command.
+     */
+    public boolean hasExited() {
+        return hasExited;
     }
 
     /**
@@ -67,6 +124,7 @@ public class Duke {
             taskList = storage.loadTasks();
         } catch (YqrException e) {
             ui.showLoadingError(e.getMessage());
+            loadingMessage = e.getMessage() + "\nStarting with an empty task list instead.";
             taskList = new TaskList();
         }
     }
