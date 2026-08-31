@@ -53,8 +53,8 @@ public class MainWindow extends AnchorPane {
         }
 
         String response = duke.getResponse(input);
-        dialogContainer.getChildren().add(DialogBox.getUserDialog(input));
-        dialogContainer.getChildren().add(DialogBox.getYqrDialog(response));
+        dialogContainer.getChildren().addAll(
+                DialogBox.getUserDialog(input), DialogBox.getYqrDialog(response));
         userInput.clear();
 
         if (duke.hasExited()) {
