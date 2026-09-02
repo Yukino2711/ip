@@ -52,9 +52,7 @@ public class Duke {
             try {
                 String fullCommand = ui.readCommand();
                 ui.showLine();
-                Command command = Parser.parse(fullCommand);
-                command.execute(taskList, ui, storage);
-                hasExited = command.isExit();
+                executeCommand(fullCommand, ui);
             } catch (YqrException e) {
                 ui.showError(e.getMessage());
             } finally {
@@ -86,9 +84,7 @@ public class Duke {
         List<String> responseLines = new ArrayList<>();
         Ui responseUi = new Ui(responseLines::add);
         try {
-            Command command = Parser.parse(input);
-            command.execute(taskList, responseUi, storage);
-            hasExited = command.isExit();
+            executeCommand(input, responseUi);
         } catch (YqrException e) {
             responseUi.showError(e.getMessage());
         }
@@ -114,6 +110,19 @@ public class Duke {
      */
     public boolean hasExited() {
         return hasExited;
+    }
+
+    /**
+     * Parses and executes one command, then records whether it ends the session.
+     *
+     * @param input command entered by the user.
+     * @param commandUi user interface used to display the command result.
+     * @throws YqrException if the command cannot be parsed or executed.
+     */
+    private void executeCommand(String input, Ui commandUi) throws YqrException {
+        Command command = Parser.parse(input);
+        command.execute(taskList, commandUi, storage);
+        hasExited = command.isExit();
     }
 
     /**
