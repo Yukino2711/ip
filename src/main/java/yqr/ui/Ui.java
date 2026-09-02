@@ -100,9 +100,7 @@ public class Ui {
      */
     public void showTaskList(List<Task> tasks) {
         showLines("Here are the tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            showLines((i + 1) + "." + tasks.get(i));
-        }
+        showNumberedTasks(tasks);
     }
 
     /**
@@ -112,6 +110,15 @@ public class Ui {
      */
     public void showMatchingTasks(List<Task> tasks) {
         showLines("Here are the matching tasks in your list:");
+        showNumberedTasks(tasks);
+    }
+
+    /**
+     * Displays tasks in their list order using one-based numbering.
+     *
+     * @param tasks tasks to display.
+     */
+    private void showNumberedTasks(List<Task> tasks) {
         for (int i = 0; i < tasks.size(); i++) {
             showLines((i + 1) + "." + tasks.get(i));
         }
