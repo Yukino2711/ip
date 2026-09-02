@@ -1,7 +1,7 @@
 package yqr.gui;
 
 import java.io.IOException;
-import java.util.Objects;
+import java.net.URL;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -26,15 +26,23 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage stage) {
+        assert stage != null : "JavaFX should provide a primary stage";
+
         try {
-            FXMLLoader loader = new FXMLLoader(Main.class.getResource("/view/MainWindow.fxml"));
+            URL mainWindowResource = Main.class.getResource("/view/MainWindow.fxml");
+            assert mainWindowResource != null : "MainWindow.fxml should be available";
+
+            FXMLLoader loader = new FXMLLoader(mainWindowResource);
             AnchorPane root = loader.load();
             MainWindow controller = loader.getController();
+            assert root != null : "MainWindow.fxml should define a root node";
+            assert controller != null : "MainWindow.fxml should define a controller";
             controller.setDuke(duke);
 
             Scene scene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
-            String stylesheet = Objects.requireNonNull(Main.class.getResource("/css/main.css")).toExternalForm();
-            scene.getStylesheets().add(stylesheet);
+            URL stylesheetResource = Main.class.getResource("/css/main.css");
+            assert stylesheetResource != null : "main.css should be available";
+            scene.getStylesheets().add(stylesheetResource.toExternalForm());
 
             stage.setTitle("yqr");
             stage.setMinWidth(520);
