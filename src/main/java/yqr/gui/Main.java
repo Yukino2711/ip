@@ -16,6 +16,8 @@ import yqr.Duke;
 public class Main extends Application {
     private static final double WINDOW_WIDTH = 720;
     private static final double WINDOW_HEIGHT = 640;
+    private static final double MIN_WINDOW_WIDTH = 520;
+    private static final double MIN_WINDOW_HEIGHT = 480;
 
     private final Duke duke = new Duke();
 
@@ -45,8 +47,8 @@ public class Main extends Application {
             scene.getStylesheets().add(stylesheetResource.toExternalForm());
 
             stage.setTitle("yqr");
-            stage.setMinWidth(520);
-            stage.setMinHeight(480);
+            stage.setMinWidth(MIN_WINDOW_WIDTH);
+            stage.setMinHeight(MIN_WINDOW_HEIGHT);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
