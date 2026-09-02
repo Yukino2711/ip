@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import yqr.exception.YqrException;
 import yqr.task.Deadline;
@@ -21,6 +22,12 @@ import yqr.task.Todo;
  */
 public class Storage {
     private static final String FIELD_SEPARATOR = " | ";
+    private static final String TODO_TYPE = "T";
+    private static final String DEADLINE_TYPE = "D";
+    private static final String EVENT_TYPE = "E";
+    private static final String DONE_STATUS = "1";
+    private static final String NOT_DONE_STATUS = "0";
+
     private final Path filePath;
 
     /**
@@ -88,18 +95,18 @@ public class Storage {
      * @return serialized task.
      */
     private String formatTask(Task task) {
-        String status = task.isDone() ? "1" : "0";
+        String status = task.isDone() ? DONE_STATUS : NOT_DONE_STATUS;
         if (task instanceof Deadline) {
             Deadline deadline = (Deadline) task;
-            return String.join(FIELD_SEPARATOR, "D", status,
+            return String.join(FIELD_SEPARATOR, DEADLINE_TYPE, status,
                     deadline.getDescription(), deadline.getBy().toString());
         }
         if (task instanceof Event) {
             Event event = (Event) task;
-            return String.join(FIELD_SEPARATOR, "E", status,
+            return String.join(FIELD_SEPARATOR, EVENT_TYPE, status,
                     event.getDescription(), event.getFrom(), event.getTo());
         }
-        return String.join(FIELD_SEPARATOR, "T", status, task.getDescription());
+        return String.join(FIELD_SEPARATOR, TODO_TYPE, status, task.getDescription());
     }
 
     /**
@@ -111,20 +118,20 @@ public class Storage {
      * @throws YqrException if the line is malformed.
      */
     private Task parseTask(String line, int lineNumber) throws YqrException {
-        String[] fields = line.split(" \\| ", -1);
+        String[] fields = line.split(Pattern.quote(FIELD_SEPARATOR), -1);
         if (fields.length < 3) {
             throw invalidData(lineNumber);
         }
 
         Task task;
         switch (fields[0]) {
-            case "T":
+            case TODO_TYPE:
                 if (fields.length != 3) {
                     throw invalidData(lineNumber);
                 }
                 task = new Todo(fields[2]);
                 break;
-            case "D":
+            case DEADLINE_TYPE:
                 if (fields.length != 4) {
                     throw invalidData(lineNumber);
                 }
@@ -134,7 +141,7 @@ public class Storage {
                     throw invalidData(lineNumber);
                 }
                 break;
-            case "E":
+            case EVENT_TYPE:
                 if (fields.length != 5) {
                     throw invalidData(lineNumber);
                 }
@@ -144,9 +151,9 @@ public class Storage {
                 throw invalidData(lineNumber);
         }
 
-        if (fields[1].equals("1")) {
+        if (fields[1].equals(DONE_STATUS)) {
             task.markAsDone();
-        } else if (!fields[1].equals("0")) {
+        } else if (!fields[1].equals(NOT_DONE_STATUS)) {
             throw invalidData(lineNumber);
         }
         return task;
