@@ -78,10 +78,9 @@ public class Storage {
                 Files.createDirectories(parentDirectory);
             }
 
-            List<String> lines = new ArrayList<>();
-            for (Task task : taskList.getTasks()) {
-                lines.add(formatTask(task));
-            }
+            List<String> lines = taskList.getTasks().stream()
+                    .map(this::formatTask)
+                    .toList();
             Files.write(filePath, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new YqrException("Unable to save tasks: " + e.getMessage());
