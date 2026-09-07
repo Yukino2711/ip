@@ -1,6 +1,7 @@
 package yqr;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
@@ -34,6 +35,25 @@ class DukeTest {
         String response = duke.getResponse("unknown");
 
         assertEquals("Please input valid commands", response);
+    }
+
+    @Test
+    void getCommandResult_validCommand_resultNotMarkedAsError() {
+        Duke duke = new Duke(temporaryDirectory.resolve("tasks.txt").toString());
+
+        CommandResult result = duke.getCommandResult("list");
+
+        assertFalse(result.isError());
+    }
+
+    @Test
+    void getCommandResult_invalidCommand_resultMarkedAsError() {
+        Duke duke = new Duke(temporaryDirectory.resolve("tasks.txt").toString());
+
+        CommandResult result = duke.getCommandResult("unknown");
+
+        assertEquals("Please input valid commands", result.text());
+        assertTrue(result.isError());
     }
 
     @Test

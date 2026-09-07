@@ -35,6 +35,7 @@ public class DialogBox extends HBox {
 
         dialog.setText(text);
         avatar.setText(avatarText);
+        dialog.maxWidthProperty().bind(widthProperty().multiply(0.76));
     }
 
     /**
@@ -44,7 +45,10 @@ public class DialogBox extends HBox {
      * @return user dialog box.
      */
     public static DialogBox getUserDialog(String text) {
-        return new DialogBox(text, "YOU");
+        DialogBox dialogBox = new DialogBox(text, "");
+        dialogBox.getChildren().remove(dialogBox.avatar);
+        dialogBox.getStyleClass().add("user-dialog");
+        return dialogBox;
     }
 
     /**
@@ -55,14 +59,29 @@ public class DialogBox extends HBox {
      */
     public static DialogBox getYqrDialog(String text) {
         DialogBox dialogBox = new DialogBox(text, "YQR");
-        dialogBox.flip();
+        dialogBox.formatAsYqrDialog();
+        return dialogBox;
+    }
+
+    /**
+     * Creates a highlighted left-aligned dialog for an error response.
+     *
+     * @param text error response produced by yqr.
+     * @return highlighted error dialog box.
+     */
+    public static DialogBox getErrorDialog(String text) {
+        DialogBox dialogBox = new DialogBox(text, "!");
+        dialogBox.formatAsYqrDialog();
+        dialogBox.dialog.getStyleClass().add("error-bubble");
+        dialogBox.avatar.getStyleClass().add("error-avatar");
         return dialogBox;
     }
 
     /** Places the avatar before the response and applies chatbot-specific styles. */
-    private void flip() {
+    private void formatAsYqrDialog() {
         getChildren().setAll(avatar, dialog);
         setAlignment(Pos.TOP_LEFT);
+        getStyleClass().add("yqr-dialog");
         dialog.getStyleClass().add("yqr-bubble");
         avatar.getStyleClass().add("yqr-avatar");
     }

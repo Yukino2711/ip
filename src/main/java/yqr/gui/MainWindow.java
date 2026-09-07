@@ -4,14 +4,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import yqr.CommandResult;
 import yqr.Duke;
 
 /**
  * Controls the main chat window and forwards user input to the chatbot.
  */
-public class MainWindow extends AnchorPane {
+public class MainWindow {
     @FXML
     private ScrollPane scrollPane;
     @FXML
@@ -52,9 +52,12 @@ public class MainWindow extends AnchorPane {
             return;
         }
 
-        String response = duke.getResponse(input);
+        CommandResult result = duke.getCommandResult(input);
+        DialogBox responseDialog = result.isError()
+                ? DialogBox.getErrorDialog(result.text())
+                : DialogBox.getYqrDialog(result.text());
         dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input), DialogBox.getYqrDialog(response));
+                DialogBox.getUserDialog(input), responseDialog);
         userInput.clear();
 
         if (duke.hasExited()) {
