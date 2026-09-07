@@ -78,16 +78,16 @@
     -fx-text-fill: #1d2433;
 }
 
-.avatar {
-    -fx-background-color: #1d2433;
-    -fx-background-radius: 17px;
-    -fx-font-size: 9px;
-    -fx-font-weight: bold;
-    -fx-text-fill: white;
+.avatar-frame {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 19px;
+    -fx-border-color: #cbd3e1;
+    -fx-border-radius: 19px;
+    -fx-padding: 2px;
 }
 
-.yqr-avatar {
-    -fx-background-color: #0f766e;
+.error-avatar {
+    -fx-border-color: #e11d48;
 }
 
 .error-bubble {
@@ -97,9 +97,12 @@
     -fx-text-fill: #9f1239;
 }
 
-.error-avatar {
+.error-badge {
     -fx-background-color: #e11d48;
-    -fx-font-size: 16px;
+    -fx-background-radius: 8px;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
 }
 
 .scroll-bar:vertical {
