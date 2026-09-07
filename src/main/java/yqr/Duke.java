@@ -77,18 +77,31 @@ public class Duke {
      * @return chatbot response, with multiple lines joined by newline characters.
      */
     public String getResponse(String input) {
+        return getCommandResult(input).text();
+    }
+
+    /**
+     * Executes one user command and returns its display text and outcome.
+     *
+     * @param input command entered by the user.
+     * @return result containing the response text and error status.
+     */
+    public CommandResult getCommandResult(String input) {
         if (hasExited) {
-            return "This session has ended. Restart yqr to enter more commands.";
+            return new CommandResult(
+                    "This session has ended. Restart yqr to enter more commands.", true);
         }
 
         List<String> responseLines = new ArrayList<>();
         Ui responseUi = new Ui(responseLines::add);
+        boolean isError = false;
         try {
             executeCommand(input, responseUi);
         } catch (YqrException e) {
             responseUi.showError(e.getMessage());
+            isError = true;
         }
-        return String.join("\n", responseLines);
+        return new CommandResult(String.join("\n", responseLines), isError);
     }
 
     /**

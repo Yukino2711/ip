@@ -5,8 +5,8 @@ import java.net.URL;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import yqr.Duke;
 
@@ -35,7 +35,7 @@ public class Main extends Application {
             assert mainWindowResource != null : "MainWindow.fxml should be available";
 
             FXMLLoader loader = new FXMLLoader(mainWindowResource);
-            AnchorPane root = loader.load();
+            Parent root = loader.load();
             MainWindow controller = loader.getController();
             assert root != null : "MainWindow.fxml should define a root node";
             assert controller != null : "MainWindow.fxml should define a controller";
@@ -49,6 +49,7 @@ public class Main extends Application {
             stage.setTitle("yqr");
             stage.setMinWidth(MIN_WINDOW_WIDTH);
             stage.setMinHeight(MIN_WINDOW_HEIGHT);
+            stage.setResizable(true);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {

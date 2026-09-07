@@ -6,18 +6,18 @@
 <?import javafx.scene.layout.Priority?>
 
 <fx:root alignment="TOP_RIGHT" maxWidth="1.7976931348623157E308"
-         spacing="10.0" type="javafx.scene.layout.HBox"
+         spacing="8.0" type="javafx.scene.layout.HBox"
          xmlns="http://javafx.com/javafx/17"
          xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <Label fx:id="dialog" maxWidth="520.0" minHeight="-Infinity"
+        <Label fx:id="dialog" minHeight="-Infinity" minWidth="0.0"
                styleClass="message-bubble" text="Message" wrapText="true"
                HBox.hgrow="ALWAYS" />
-        <Label fx:id="avatar" alignment="CENTER" maxHeight="48.0" maxWidth="48.0"
-               minHeight="48.0" minWidth="48.0" prefHeight="48.0" prefWidth="48.0"
+        <Label fx:id="avatar" alignment="CENTER" maxHeight="34.0" maxWidth="34.0"
+               minHeight="34.0" minWidth="34.0" prefHeight="34.0" prefWidth="34.0"
                styleClass="avatar" text="YOU" />
     </children>
     <padding>
-        <Insets bottom="4.0" top="4.0" />
+        <Insets bottom="3.0" top="3.0" />
     </padding>
 </fx:root>
