@@ -31,8 +31,23 @@ public class MarkCommand extends Command {
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws YqrException {
+        boolean wasDone = tasks.isTaskDone(taskNumber);
         Task task = tasks.markTaskAsDone(taskNumber);
+        try {
+            storage.saveTasks(tasks);
+        } catch (YqrException e) {
+            restoreTaskStatus(tasks, wasDone);
+            throw e;
+        }
         ui.showTaskStatusChange(task, true);
-        storage.saveTasks(tasks);
+    }
+
+    /** Restores the task status after a storage failure. */
+    private void restoreTaskStatus(TaskList tasks, boolean wasDone) throws YqrException {
+        if (wasDone) {
+            tasks.markTaskAsDone(taskNumber);
+        } else {
+            tasks.markTaskAsNotDone(taskNumber);
+        }
     }
 }

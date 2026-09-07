@@ -38,6 +38,21 @@ public class TaskList {
     }
 
     /**
+     * Inserts a task at a one-based position, primarily to restore a failed deletion.
+     *
+     * @param taskNumber one-based position at which to insert the task.
+     * @param task task to insert.
+     * @throws YqrException if the position or task is invalid.
+     */
+    public void insertTask(int taskNumber, Task task) throws YqrException {
+        if (taskNumber < 1 || taskNumber > tasks.size() + 1) {
+            throw new YqrException("Please input a valid task number");
+        }
+        ensureTaskCanBeAdded(task);
+        tasks.add(taskNumber - 1, task);
+    }
+
+    /**
      * Returns the number of tasks currently stored.
      *
      * @return number of stored tasks.
@@ -104,6 +119,17 @@ public class TaskList {
         Task task = getTask(taskNumber);
         task.markAsNotDone();
         return task;
+    }
+
+    /**
+     * Returns the completion status of a task.
+     *
+     * @param taskNumber one-based task number.
+     * @return whether the task is complete.
+     * @throws YqrException if the task number is outside the list.
+     */
+    public boolean isTaskDone(int taskNumber) throws YqrException {
+        return getTask(taskNumber).isDone();
     }
 
     /** Rejects null or duplicate tasks before they are added. */

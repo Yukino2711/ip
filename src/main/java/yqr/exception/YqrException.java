@@ -1,7 +1,7 @@
 package yqr.exception;
 
 /**
- * Represents an error caused by an invalid command entered in yqr.
+ * Represents a recoverable command, data, or storage error that can be shown to the user.
  */
 public class YqrException extends Exception {
     /**

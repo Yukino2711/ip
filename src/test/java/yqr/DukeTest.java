@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -54,6 +56,40 @@ class DukeTest {
 
         assertEquals("Please input valid commands", result.text());
         assertTrue(result.isError());
+    }
+
+    @Test
+    void getCommandResult_nullCommand_clearErrorReturned() {
+        Duke duke = new Duke(temporaryDirectory.resolve("tasks.txt").toString());
+
+        CommandResult result = duke.getCommandResult(null);
+
+        assertEquals("Please enter a command", result.text());
+        assertTrue(result.isError());
+    }
+
+    @Test
+    void getCommandResult_duplicateTask_errorReturnedAndListUnchanged() {
+        Duke duke = new Duke(temporaryDirectory.resolve("tasks.txt").toString());
+        duke.getResponse("todo read book");
+
+        CommandResult duplicateResult = duke.getCommandResult("todo read book");
+
+        assertEquals("This task already exists in the list", duplicateResult.text());
+        assertTrue(duplicateResult.isError());
+        assertEquals("Here are the tasks in your list:\n1. [T][ ] read book",
+                duke.getResponse("list"));
+    }
+
+    @Test
+    void getWelcomeMessage_corruptedStorage_warningReturnedAndEmptyListUsed() throws Exception {
+        Path dataFile = temporaryDirectory.resolve("tasks.txt");
+        Files.writeString(dataFile, "invalid data", StandardCharsets.UTF_8);
+
+        Duke duke = new Duke(dataFile.toString());
+
+        assertTrue(duke.getWelcomeMessage().contains("Invalid saved task on line 1"));
+        assertEquals("There are no tasks in your list.", duke.getResponse("list"));
     }
 
     @Test

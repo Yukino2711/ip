@@ -8,11 +8,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import yqr.exception.YqrException;
 import yqr.task.Deadline;
 import yqr.task.Event;
+import yqr.task.EventTimeValidator;
 import yqr.task.Task;
 import yqr.task.TaskList;
 import yqr.task.Todo;
@@ -36,7 +38,7 @@ public class Storage {
      * @param filePath relative path of the task data file.
      */
     public Storage(Path filePath) {
-        this.filePath = filePath;
+        this.filePath = Objects.requireNonNull(filePath, "Storage path cannot be null");
     }
 
     /**
@@ -46,22 +48,25 @@ public class Storage {
      * @throws YqrException if the file cannot be read or contains invalid data.
      */
     public TaskList loadTasks() throws YqrException {
-        if (Files.notExists(filePath)) {
-            return new TaskList();
-        }
-
         try {
+            if (Files.notExists(filePath)) {
+                return new TaskList();
+            }
             List<String> lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
             List<Task> tasks = new ArrayList<>();
             for (int i = 0; i < lines.size(); i++) {
                 String line = lines.get(i);
                 if (!line.isBlank()) {
-                    tasks.add(parseTask(line, i + 1));
+                    Task task = parseTask(line, i + 1);
+                    if (tasks.stream().anyMatch(task::hasSameDetails)) {
+                        throw new YqrException("Duplicate saved task on line " + (i + 1));
+                    }
+                    tasks.add(task);
                 }
             }
             return new TaskList(tasks);
-        } catch (IOException e) {
-            throw new YqrException("Unable to load saved tasks: " + e.getMessage());
+        } catch (IOException | SecurityException e) {
+            throw new YqrException("Unable to load saved tasks: " + describe(e));
         }
     }
 
@@ -72,6 +77,7 @@ public class Storage {
      * @throws YqrException if the data file cannot be written.
      */
     public void saveTasks(TaskList taskList) throws YqrException {
+        validateTasksForSaving(taskList);
         try {
             Path parentDirectory = filePath.getParent();
             if (parentDirectory != null) {
@@ -82,8 +88,42 @@ public class Storage {
                     .map(this::formatTask)
                     .toList();
             Files.write(filePath, lines, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new YqrException("Unable to save tasks: " + e.getMessage());
+        } catch (IOException | SecurityException e) {
+            throw new YqrException("Unable to save tasks: " + describe(e));
+        }
+    }
+
+    /** Rejects task data that would be ambiguous or invalid when loaded again. */
+    private static void validateTasksForSaving(TaskList taskList) throws YqrException {
+        if (taskList == null) {
+            throw new YqrException("Unable to save tasks: task list is missing");
+        }
+        List<Task> tasks = taskList.getTasks();
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            validateStoredText(task.getDescription());
+            if (!(task instanceof Todo) && !(task instanceof Deadline) && !(task instanceof Event)) {
+                throw new YqrException("Unable to save tasks: unsupported task type");
+            }
+            if (task instanceof Event) {
+                Event event = (Event) task;
+                validateStoredText(event.getFrom());
+                validateStoredText(event.getTo());
+                EventTimeValidator.validate(event.getFrom(), event.getTo());
+            }
+            for (int j = 0; j < i; j++) {
+                if (task.hasSameDetails(tasks.get(j))) {
+                    throw new YqrException("Unable to save tasks: duplicate task details");
+                }
+            }
+        }
+    }
+
+    /** Rejects blank text and characters reserved by the line-based storage format. */
+    private static void validateStoredText(String text) throws YqrException {
+        if (text.isBlank() || text.indexOf('|') >= 0
+                || text.indexOf('\n') >= 0 || text.indexOf('\r') >= 0) {
+            throw new YqrException("Unable to save tasks: task details contain unsupported text");
         }
     }
 
@@ -121,17 +161,22 @@ public class Storage {
         if (fields.length < 3) {
             throw invalidData(lineNumber);
         }
+        for (int i = 2; i < fields.length; i++) {
+            if (fields[i].indexOf('|') >= 0) {
+                throw invalidData(lineNumber);
+            }
+        }
 
         Task task;
         switch (fields[0]) {
             case TODO_TYPE:
-                if (fields.length != 3) {
+                if (fields.length != 3 || fields[2].isBlank()) {
                     throw invalidData(lineNumber);
                 }
                 task = new Todo(fields[2]);
                 break;
             case DEADLINE_TYPE:
-                if (fields.length != 4) {
+                if (fields.length != 4 || fields[2].isBlank() || fields[3].isBlank()) {
                     throw invalidData(lineNumber);
                 }
                 try {
@@ -141,7 +186,13 @@ public class Storage {
                 }
                 break;
             case EVENT_TYPE:
-                if (fields.length != 5) {
+                if (fields.length != 5 || fields[2].isBlank()
+                        || fields[3].isBlank() || fields[4].isBlank()) {
+                    throw invalidData(lineNumber);
+                }
+                try {
+                    EventTimeValidator.validate(fields[3], fields[4]);
+                } catch (YqrException e) {
                     throw invalidData(lineNumber);
                 }
                 task = new Event(fields[2], fields[3], fields[4]);
@@ -156,6 +207,14 @@ public class Storage {
             throw invalidData(lineNumber);
         }
         return task;
+    }
+
+    /** Returns a useful message even when an I/O exception has no detail text. */
+    private static String describe(Exception exception) {
+        String message = exception.getMessage();
+        return message == null || message.isBlank()
+                ? exception.getClass().getSimpleName()
+                : message;
     }
 
     /**
