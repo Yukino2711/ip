@@ -273,6 +273,77 @@ class TaskListTest {
         assertEquals(INVALID_TASK_NUMBER_MESSAGE, exception.getMessage());
     }
 
+    @Test
+    void undo_addedTask_previousTaskListRestored() throws YqrException {
+        Todo originalTask = new Todo("original");
+        TaskList taskList = new TaskList(List.of(originalTask));
+        taskList.addTask(new Todo("added"));
+
+        taskList.undo();
+
+        assertEquals(1, taskList.getTaskCount());
+        assertEquals(originalTask.toString(), taskList.getTasks().get(0).toString());
+    }
+
+    @Test
+    void undo_deletedDoneTask_taskAndStatusRestored() throws YqrException {
+        Todo deletedTask = new Todo("completed task");
+        deletedTask.markAsDone();
+        TaskList taskList = new TaskList(List.of(deletedTask, new Todo("remaining")));
+        taskList.deleteTask(1);
+
+        taskList.undo();
+
+        assertEquals(2, taskList.getTaskCount());
+        assertEquals("[T][X] completed task", taskList.getTasks().get(0).toString());
+    }
+
+    @Test
+    void undo_deletedDatedTasks_taskTypesAndDetailsRestored() throws YqrException {
+        Deadline deadline = new Deadline("submit report", LocalDate.of(2026, 9, 8));
+        Event event = new Event("project meeting", "2pm", "3pm");
+        TaskList taskList = new TaskList(List.of(deadline, event));
+        taskList.deleteTask(1);
+
+        taskList.undo();
+
+        assertEquals(deadline.toString(), taskList.getTasks().get(0).toString());
+        assertEquals(event.toString(), taskList.getTasks().get(1).toString());
+    }
+
+    @Test
+    void undo_markedTask_incompleteStatusRestored() throws YqrException {
+        TaskList taskList = new TaskList(List.of(new Todo("task")));
+        taskList.markTaskAsDone(1);
+
+        taskList.undo();
+
+        assertFalse(taskList.getTasks().get(0).isDone());
+    }
+
+    @Test
+    void undo_unmarkedTask_completedStatusRestored() throws YqrException {
+        Todo task = new Todo("task");
+        task.markAsDone();
+        TaskList taskList = new TaskList(List.of(task));
+        taskList.markTaskAsNotDone(1);
+
+        taskList.undo();
+
+        assertTrue(taskList.getTasks().get(0).isDone());
+    }
+
+    @Test
+    void undo_twice_secondUndoRejected() throws YqrException {
+        TaskList taskList = new TaskList();
+        taskList.addTask(new Todo("task"));
+        taskList.undo();
+
+        YqrException exception = assertThrows(YqrException.class, taskList::undo);
+
+        assertEquals("There is no command to undo", exception.getMessage());
+    }
+
     /**
      * Asserts that an operation fails because its task number is outside the list.
      *

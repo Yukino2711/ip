@@ -10,6 +10,8 @@ import yqr.exception.YqrException;
  */
 public class TaskList {
     private final List<Task> tasks = new ArrayList<>();
+    /** Reverses the most recent task change, or is {@code null} when none is available. */
+    private Runnable lastUndoAction;
 
     /**
      * Creates an empty task list.
@@ -32,7 +34,9 @@ public class TaskList {
      * @param task task to store.
      */
     public void addTask(Task task) {
+        int taskIndex = tasks.size();
         tasks.add(task);
+        lastUndoAction = () -> tasks.remove(taskIndex);
     }
 
     /**
@@ -74,7 +78,9 @@ public class TaskList {
      */
     public Task deleteTask(int taskNumber) throws YqrException {
         Task task = getTask(taskNumber);
-        tasks.remove(taskNumber - 1);
+        int taskIndex = taskNumber - 1;
+        tasks.remove(taskIndex);
+        lastUndoAction = () -> tasks.add(taskIndex, task);
         return task;
     }
 
@@ -87,7 +93,9 @@ public class TaskList {
      */
     public Task markTaskAsDone(int taskNumber) throws YqrException {
         Task task = getTask(taskNumber);
+        boolean wasDone = task.isDone();
         task.markAsDone();
+        lastUndoAction = () -> setTaskStatus(task, wasDone);
         return task;
     }
 
@@ -100,8 +108,32 @@ public class TaskList {
      */
     public Task markTaskAsNotDone(int taskNumber) throws YqrException {
         Task task = getTask(taskNumber);
+        boolean wasDone = task.isDone();
         task.markAsNotDone();
+        lastUndoAction = () -> setTaskStatus(task, wasDone);
         return task;
+    }
+
+    /**
+     * Restores the task list to its state before the most recent change.
+     *
+     * @throws YqrException if no task-changing command can be undone.
+     */
+    public void undo() throws YqrException {
+        if (lastUndoAction == null) {
+            throw new YqrException("There is no command to undo");
+        }
+        lastUndoAction.run();
+        lastUndoAction = null;
+    }
+
+    /** Restores a task's previous completion status. */
+    private static void setTaskStatus(Task task, boolean isDone) {
+        if (isDone) {
+            task.markAsDone();
+        } else {
+            task.markAsNotDone();
+        }
     }
 
     /**

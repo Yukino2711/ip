@@ -10,6 +10,7 @@ import yqr.command.ExitCommand;
 import yqr.command.FindCommand;
 import yqr.command.ListCommand;
 import yqr.command.MarkCommand;
+import yqr.command.UndoCommand;
 import yqr.command.UnmarkCommand;
 import yqr.exception.YqrException;
 import yqr.task.Deadline;
@@ -55,6 +56,11 @@ public class Parser {
                 return new AddCommand(parseEvent(command));
             case "find":
                 return new FindCommand(parseFindKeyword(command));
+            case "undo":
+                if (command.equals("undo")) {
+                    return new UndoCommand();
+                }
+                break;
             case "bye":
                 if (command.equals("bye")) {
                     return new ExitCommand();

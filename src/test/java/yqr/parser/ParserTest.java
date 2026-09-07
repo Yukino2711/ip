@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import yqr.command.Command;
 import yqr.command.FindCommand;
+import yqr.command.UndoCommand;
 import yqr.exception.YqrException;
 
 /**
@@ -35,5 +36,17 @@ class ParserTest {
         YqrException exception = assertThrows(YqrException.class, () -> Parser.parse("find     "));
 
         assertEquals(MISSING_KEYWORD_MESSAGE, exception.getMessage());
+    }
+
+    @Test
+    void parse_undoCommand_undoCommandReturned() throws YqrException {
+        Command command = Parser.parse("undo");
+
+        assertInstanceOf(UndoCommand.class, command);
+    }
+
+    @Test
+    void parse_undoWithArguments_exceptionThrown() {
+        assertThrows(YqrException.class, () -> Parser.parse("undo 1"));
     }
 }
