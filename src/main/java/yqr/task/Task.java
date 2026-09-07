@@ -1,5 +1,7 @@
 package yqr.task;
 
+import java.util.Objects;
+
 /**
  * Represents a task and whether it has been completed.
  */
@@ -13,7 +15,7 @@ public class Task {
      * @param description description of the task.
      */
     public Task(String description) {
-        this.description = description;
+        this.description = Objects.requireNonNull(description, "Task description cannot be null");
         this.isDone = false;
     }
 
@@ -47,6 +49,19 @@ public class Task {
      */
     public boolean isDone() {
         return isDone;
+    }
+
+    /**
+     * Returns whether another task has the same type and user-provided details.
+     * Completion status is deliberately ignored when detecting duplicates.
+     *
+     * @param other task to compare.
+     * @return {@code true} if both tasks have the same identifying details.
+     */
+    public boolean hasSameDetails(Task other) {
+        return other != null
+                && getClass().equals(other.getClass())
+                && description.equals(other.description);
     }
 
     /**

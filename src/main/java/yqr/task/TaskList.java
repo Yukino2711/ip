@@ -30,8 +30,10 @@ public class TaskList {
      * Adds a task to the list.
      *
      * @param task task to store.
+     * @throws YqrException if a task with the same type and details already exists.
      */
-    public void addTask(Task task) {
+    public void addTask(Task task) throws YqrException {
+        ensureTaskCanBeAdded(task);
         tasks.add(task);
     }
 
@@ -102,6 +104,16 @@ public class TaskList {
         Task task = getTask(taskNumber);
         task.markAsNotDone();
         return task;
+    }
+
+    /** Rejects null or duplicate tasks before they are added. */
+    private void ensureTaskCanBeAdded(Task task) throws YqrException {
+        if (task == null) {
+            throw new YqrException("Task cannot be empty");
+        }
+        if (tasks.stream().anyMatch(task::hasSameDetails)) {
+            throw new YqrException("This task already exists in the list");
+        }
     }
 
     /**
