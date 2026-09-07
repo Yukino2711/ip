@@ -24,8 +24,18 @@ public class Ui {
      * Creates a user interface connected to standard input.
      */
     public Ui() {
-        scanner = new Scanner(System.in);
-        output = System.out::println;
+        this(new Scanner(System.in), System.out::println);
+    }
+
+    /**
+     * Creates a user interface connected to the given input and output.
+     *
+     * @param scanner scanner used to read commands.
+     * @param output consumer that receives displayed lines.
+     */
+    public Ui(Scanner scanner, Consumer<String> output) {
+        this.scanner = Objects.requireNonNull(scanner);
+        this.output = Objects.requireNonNull(output);
     }
 
     /**

@@ -1,15 +1,30 @@
 package yqr.ui;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.junit.jupiter.api.Test;
 
 import yqr.task.Todo;
 
 class UiTest {
+    @Test
+    void readCommand_commandSurroundedByWhitespace_trimmedCommandReturned() {
+        try (Scanner scanner = new Scanner("  list  \n")) {
+            Ui ui = new Ui(scanner, ignored -> { });
+
+            assertTrue(ui.hasNextCommand());
+            assertEquals("list", ui.readCommand());
+            assertFalse(ui.hasNextCommand());
+        }
+    }
+
     @Test
     void showTaskAdded_taskAndCountProvided_allLinesEmittedInOrder() {
         List<String> outputLines = new ArrayList<>();
