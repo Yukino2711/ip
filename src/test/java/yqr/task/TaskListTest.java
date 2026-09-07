@@ -21,7 +21,7 @@ class TaskListTest {
     private static final String INVALID_TASK_NUMBER_MESSAGE = "Please input a valid task number";
 
     @Test
-    void addTask_emptyList_taskAdded() {
+    void addTask_emptyList_taskAdded() throws YqrException {
         Task task = new Todo("read book");
         TaskList taskList = new TaskList();
 
@@ -32,7 +32,7 @@ class TaskListTest {
     }
 
     @Test
-    void addTask_nonEmptyList_taskAppendedAtEnd() {
+    void addTask_nonEmptyList_taskAppendedAtEnd() throws YqrException {
         Task firstTask = new Todo("first");
         Task secondTask = new Todo("second");
         TaskList taskList = new TaskList(List.of(firstTask));
@@ -40,6 +40,37 @@ class TaskListTest {
         taskList.addTask(secondTask);
 
         assertIterableEquals(List.of(firstTask, secondTask), taskList.getTasks());
+    }
+
+    @Test
+    void addTask_duplicateTodoWithDifferentStatus_duplicateRejected() {
+        Todo existingTask = new Todo("read book");
+        existingTask.markAsDone();
+        TaskList taskList = new TaskList(List.of(existingTask));
+
+        YqrException exception = assertThrows(
+                YqrException.class, () -> taskList.addTask(new Todo("read book")));
+
+        assertEquals("This task already exists in the list", exception.getMessage());
+        assertEquals(1, taskList.getTaskCount());
+    }
+
+    @Test
+    void addTask_sameDescriptionWithDifferentType_bothTasksStored() throws YqrException {
+        TaskList taskList = new TaskList(List.of(new Todo("submit report")));
+
+        taskList.addTask(new Deadline("submit report", LocalDate.of(2026, 9, 30)));
+
+        assertEquals(2, taskList.getTaskCount());
+    }
+
+    @Test
+    void addTask_nullTask_nullRejected() {
+        TaskList taskList = new TaskList();
+
+        YqrException exception = assertThrows(YqrException.class, () -> taskList.addTask(null));
+
+        assertEquals("Task cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -53,7 +84,7 @@ class TaskListTest {
     }
 
     @Test
-    void getTasks_listChangesAfterCall_returnedSnapshotIsUnchangedAndUnmodifiable() {
+    void getTasks_listChangesAfterCall_returnedSnapshotIsUnchangedAndUnmodifiable() throws YqrException {
         Task firstTask = new Todo("first");
         Task secondTask = new Todo("second");
         TaskList taskList = new TaskList(List.of(firstTask));

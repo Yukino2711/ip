@@ -2,6 +2,8 @@ package yqr.parser;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import yqr.command.AddCommand;
 import yqr.command.Command;
@@ -14,12 +16,17 @@ import yqr.command.UnmarkCommand;
 import yqr.exception.YqrException;
 import yqr.task.Deadline;
 import yqr.task.Event;
+import yqr.task.EventTimeValidator;
 import yqr.task.Todo;
 
 /**
  * Parses user commands and converts their arguments into values used by the application.
  */
 public class Parser {
+    private static final Pattern BY_PARAMETER = parameterPattern("/by");
+    private static final Pattern FROM_PARAMETER = parameterPattern("/from");
+    private static final Pattern TO_PARAMETER = parameterPattern("/to");
+
     /** Prevents creation of this utility class. */
     private Parser() {
     }
@@ -32,6 +39,12 @@ public class Parser {
      * @throws YqrException if the command or its arguments are invalid.
      */
     public static Command parse(String fullCommand) throws YqrException {
+        if (fullCommand == null || fullCommand.isBlank()) {
+            throw new YqrException("Please enter a command");
+        }
+        if (fullCommand.indexOf('\n') >= 0 || fullCommand.indexOf('\r') >= 0) {
+            throw new YqrException("Please enter one command at a time");
+        }
         String command = fullCommand.trim();
         String commandWord = getCommandWord(command);
 
@@ -40,7 +53,7 @@ public class Parser {
                 if (command.equals("list")) {
                     return new ListCommand();
                 }
-                break;
+                throw new YqrException("The list command does not accept parameters");
             case "mark":
                 return new MarkCommand(parseTaskNumber(command, "mark"));
             case "unmark":
@@ -59,7 +72,7 @@ public class Parser {
                 if (command.equals("bye")) {
                     return new ExitCommand();
                 }
-                break;
+                throw new YqrException("The bye command does not accept parameters");
             default:
                 break;
         }
@@ -89,6 +102,10 @@ public class Parser {
         if (description.isEmpty()) {
             throw new YqrException("Please input task description");
         }
+        rejectParameter(description, BY_PARAMETER, "Todo format: todo DESCRIPTION");
+        rejectParameter(description, FROM_PARAMETER, "Todo format: todo DESCRIPTION");
+        rejectParameter(description, TO_PARAMETER, "Todo format: todo DESCRIPTION");
+        validateTaskText(description);
         return new Todo(description);
     }
 
@@ -101,27 +118,28 @@ public class Parser {
      */
     private static Deadline parseDeadline(String command) throws YqrException {
         String taskDetails = command.substring("deadline".length()).trim();
-        if (taskDetails.isEmpty() || taskDetails.startsWith("/by")) {
+        if (taskDetails.isEmpty()) {
             throw new YqrException("Please input task description");
         }
-
-        int byIndex = taskDetails.indexOf(" /by");
-        if (byIndex < 0) {
-            throw new YqrException("Please input the deadline");
-        }
-
-        String description = taskDetails.substring(0, byIndex).trim();
-        String by = taskDetails.substring(byIndex + " /by".length()).trim();
+        rejectParameter(taskDetails, FROM_PARAMETER,
+                "Deadline format: deadline DESCRIPTION /by yyyy-MM-dd");
+        rejectParameter(taskDetails, TO_PARAMETER,
+                "Deadline format: deadline DESCRIPTION /by yyyy-MM-dd");
+        int[] byBounds = findSingleParameter(taskDetails, BY_PARAMETER, "/by",
+                "Please input the deadline using /by yyyy-MM-dd");
+        String description = taskDetails.substring(0, byBounds[0]).trim();
+        String by = taskDetails.substring(byBounds[1]).trim();
         if (description.isEmpty()) {
             throw new YqrException("Please input task description");
         }
         if (by.isEmpty()) {
             throw new YqrException("Please input the deadline");
         }
+        validateTaskText(description);
         try {
             return new Deadline(description, LocalDate.parse(by));
         } catch (DateTimeParseException e) {
-            throw new YqrException("Please input the deadline in yyyy-MM-dd format");
+            throw new YqrException("Please input a valid deadline in yyyy-MM-dd format");
         }
     }
 
@@ -134,32 +152,31 @@ public class Parser {
      */
     private static Event parseEvent(String command) throws YqrException {
         String taskDetails = command.substring("event".length()).trim();
-        if (taskDetails.isEmpty()
-                || taskDetails.startsWith("/from")
-                || taskDetails.startsWith("/to")) {
+        if (taskDetails.isEmpty()) {
             throw new YqrException("Please input task description");
         }
-
-        int fromIndex = taskDetails.indexOf(" /from");
-        if (fromIndex < 0) {
-            throw new YqrException("Please input the starting and ending details");
+        rejectParameter(taskDetails, BY_PARAMETER,
+                "Event format: event DESCRIPTION /from START /to END");
+        int[] fromBounds = findSingleParameter(taskDetails, FROM_PARAMETER, "/from",
+                "Please input event details using /from START /to END");
+        int[] toBounds = findSingleParameter(taskDetails, TO_PARAMETER, "/to",
+                "Please input event details using /from START /to END");
+        if (fromBounds[0] > toBounds[0]) {
+            throw new YqrException("Event format: event DESCRIPTION /from START /to END");
         }
-
-        String description = taskDetails.substring(0, fromIndex).trim();
-        String timeDetails = taskDetails.substring(fromIndex + " /from".length()).trim();
-        int toIndex = timeDetails.indexOf(" /to");
-        if (toIndex < 0) {
-            throw new YqrException("Please input the starting and ending details");
-        }
-
-        String from = timeDetails.substring(0, toIndex).trim();
-        String to = timeDetails.substring(toIndex + " /to".length()).trim();
+        String description = taskDetails.substring(0, fromBounds[0]).trim();
+        String from = taskDetails.substring(fromBounds[1], toBounds[0]).trim();
+        String to = taskDetails.substring(toBounds[1]).trim();
         if (description.isEmpty()) {
             throw new YqrException("Please input task description");
         }
         if (from.isEmpty() || to.isEmpty()) {
             throw new YqrException("Please input the starting and ending details");
         }
+        validateTaskText(description);
+        validateTaskText(from);
+        validateTaskText(to);
+        EventTimeValidator.validate(from, to);
         return new Event(description, from, to);
     }
 
@@ -188,10 +205,55 @@ public class Parser {
      */
     private static int parseTaskNumber(String command, String commandWord) throws YqrException {
         String numberText = command.substring(commandWord.length()).trim();
+        if (!numberText.matches("[1-9]\\d*")) {
+            throw new YqrException("Please input a positive task number");
+        }
         try {
             return Integer.parseInt(numberText);
         } catch (NumberFormatException e) {
-            throw new YqrException("Please input a valid task number");
+            throw new YqrException("The task number is too large");
         }
+    }
+
+    /**
+     * Finds one command parameter and rejects duplicate occurrences.
+     *
+     * @param text command text containing the parameter.
+     * @param pattern pattern matching the parameter as a complete token.
+     * @param parameterName parameter displayed in an error message.
+     * @param missingMessage message used when the parameter is absent.
+     * @return start and end indexes of the parameter.
+     * @throws YqrException if the parameter is missing or duplicated.
+     */
+    private static int[] findSingleParameter(String text, Pattern pattern, String parameterName,
+                                             String missingMessage) throws YqrException {
+        Matcher matcher = pattern.matcher(text);
+        if (!matcher.find()) {
+            throw new YqrException(missingMessage);
+        }
+        int[] bounds = {matcher.start(), matcher.end()};
+        if (matcher.find()) {
+            throw new YqrException("Please specify " + parameterName + " only once");
+        }
+        return bounds;
+    }
+
+    /** Rejects a parameter that is not valid for the current command. */
+    private static void rejectParameter(String text, Pattern pattern, String message) throws YqrException {
+        if (pattern.matcher(text).find()) {
+            throw new YqrException(message);
+        }
+    }
+
+    /** Rejects text that cannot be represented safely in the storage format. */
+    private static void validateTaskText(String text) throws YqrException {
+        if (text.indexOf('|') >= 0) {
+            throw new YqrException("Task details cannot contain the '|' character");
+        }
+    }
+
+    /** Creates a pattern matching a command parameter as a complete token. */
+    private static Pattern parameterPattern(String parameter) {
+        return Pattern.compile("(?<!\\S)" + Pattern.quote(parameter) + "(?!\\S)");
     }
 }

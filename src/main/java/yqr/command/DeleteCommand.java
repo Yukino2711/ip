@@ -32,7 +32,12 @@ public class DeleteCommand extends Command {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws YqrException {
         Task deletedTask = tasks.deleteTask(taskNumber);
+        try {
+            storage.saveTasks(tasks);
+        } catch (YqrException e) {
+            tasks.insertTask(taskNumber, deletedTask);
+            throw e;
+        }
         ui.showTaskDeleted(deletedTask, tasks.getTaskCount());
-        storage.saveTasks(tasks);
     }
 }

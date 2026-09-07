@@ -1,5 +1,7 @@
 package yqr.task;
 
+import java.util.Objects;
+
 /**
  * Represents a task that takes place between specified start and end times.
  */
@@ -16,8 +18,8 @@ public class Event extends Task {
      */
     public Event(String description, String from, String to) {
         super(description);
-        this.from = from;
-        this.to = to;
+        this.from = Objects.requireNonNull(from, "Event start cannot be null");
+        this.to = Objects.requireNonNull(to, "Event end cannot be null");
     }
 
     /**
@@ -36,6 +38,21 @@ public class Event extends Task {
      */
     public String getTo() {
         return to;
+    }
+
+    /**
+     * Returns whether another event has the same description and time details.
+     *
+     * @param other task to compare.
+     * @return {@code true} if both events have the same identifying details.
+     */
+    @Override
+    public boolean hasSameDetails(Task other) {
+        if (!super.hasSameDetails(other)) {
+            return false;
+        }
+        Event otherEvent = (Event) other;
+        return from.equals(otherEvent.from) && to.equals(otherEvent.to);
     }
 
     /**

@@ -3,6 +3,7 @@ package yqr.task;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Represents a task that must be completed by a specified date or time.
@@ -21,7 +22,7 @@ public class Deadline extends Task {
      */
     public Deadline(String description, LocalDate by) {
         super(description);
-        this.by = by;
+        this.by = Objects.requireNonNull(by, "Deadline date cannot be null");
     }
 
     /**
@@ -31,6 +32,17 @@ public class Deadline extends Task {
      */
     public LocalDate getBy() {
         return by;
+    }
+
+    /**
+     * Returns whether another deadline has the same description and date.
+     *
+     * @param other task to compare.
+     * @return {@code true} if both deadlines have the same identifying details.
+     */
+    @Override
+    public boolean hasSameDetails(Task other) {
+        return super.hasSameDetails(other) && by.equals(((Deadline) other).by);
     }
 
     /**
