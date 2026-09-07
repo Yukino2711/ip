@@ -26,6 +26,26 @@ class UiTest {
     }
 
     @Test
+    void showTaskList_emptyList_emptyListMessageEmitted() {
+        List<String> outputLines = new ArrayList<>();
+        Ui ui = new Ui(outputLines::add);
+
+        ui.showTaskList(List.of());
+
+        assertIterableEquals(List.of("There are no tasks in your list."), outputLines);
+    }
+
+    @Test
+    void showMatchingTasks_emptyList_noMatchesMessageEmitted() {
+        List<String> outputLines = new ArrayList<>();
+        Ui ui = new Ui(outputLines::add);
+
+        ui.showMatchingTasks(List.of());
+
+        assertIterableEquals(List.of("There are no matching tasks in your list."), outputLines);
+    }
+
+    @Test
     void showTaskAdded_taskAndCountProvided_allLinesEmittedInOrder() {
         List<String> outputLines = new ArrayList<>();
         Ui ui = new Ui(outputLines::add);

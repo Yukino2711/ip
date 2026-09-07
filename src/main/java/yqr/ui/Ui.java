@@ -109,6 +109,10 @@ public class Ui {
      * @param tasks tasks to display.
      */
     public void showTaskList(List<Task> tasks) {
+        if (tasks.isEmpty()) {
+            showLines("There are no tasks in your list.");
+            return;
+        }
         showLines("Here are the tasks in your list:");
         showNumberedTasks(tasks);
     }
@@ -119,6 +123,10 @@ public class Ui {
      * @param tasks matching tasks to display.
      */
     public void showMatchingTasks(List<Task> tasks) {
+        if (tasks.isEmpty()) {
+            showLines("There are no matching tasks in your list.");
+            return;
+        }
         showLines("Here are the matching tasks in your list:");
         showNumberedTasks(tasks);
     }
