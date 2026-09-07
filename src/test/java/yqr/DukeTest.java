@@ -23,7 +23,7 @@ class DukeTest {
         assertEquals("Got it. I've added this task:\n"
                 + "  [T][ ] read book\n"
                 + "Now you have 1 task in the list.", addResponse);
-        assertEquals("Here are the tasks in your list:\n1.[T][ ] read book", listResponse);
+        assertEquals("Here are the tasks in your list:\n1. [T][ ] read book", listResponse);
         assertTrue(dataFile.toFile().isFile());
     }
 

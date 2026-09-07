@@ -138,7 +138,7 @@ public class Ui {
      */
     private void showNumberedTasks(List<Task> tasks) {
         for (int i = 0; i < tasks.size(); i++) {
-            showLines((i + 1) + "." + tasks.get(i));
+            showLines((i + 1) + ". " + tasks.get(i));
         }
     }
 

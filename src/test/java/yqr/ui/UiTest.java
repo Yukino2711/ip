@@ -46,6 +46,19 @@ class UiTest {
     }
 
     @Test
+    void showTaskList_multipleTasks_numberedWithReadableSpacing() {
+        List<String> outputLines = new ArrayList<>();
+        Ui ui = new Ui(outputLines::add);
+
+        ui.showTaskList(List.of(new Todo("read book"), new Todo("write notes")));
+
+        assertIterableEquals(List.of(
+                "Here are the tasks in your list:",
+                "1. [T][ ] read book",
+                "2. [T][ ] write notes"), outputLines);
+    }
+
+    @Test
     void showTaskAdded_taskAndCountProvided_allLinesEmittedInOrder() {
         List<String> outputLines = new ArrayList<>();
         Ui ui = new Ui(outputLines::add);
