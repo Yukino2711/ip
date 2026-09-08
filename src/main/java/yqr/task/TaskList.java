@@ -10,6 +10,9 @@ import yqr.exception.YqrException;
  */
 public class TaskList {
     private final List<Task> tasks = new ArrayList<>();
+    private TaskListState undoState;
+    private TaskListState rollbackState;
+    private TaskListState rollbackUndoState;
 
     /**
      * Creates an empty task list.
@@ -34,7 +37,9 @@ public class TaskList {
      */
     public void addTask(Task task) throws YqrException {
         ensureTaskCanBeAdded(task);
+        TaskListState stateBeforeChange = captureState();
         tasks.add(task);
+        recordChange(stateBeforeChange);
     }
 
     /**
@@ -49,7 +54,9 @@ public class TaskList {
             throw new YqrException("Please input a valid task number");
         }
         ensureTaskCanBeAdded(task);
+        TaskListState stateBeforeChange = captureState();
         tasks.add(taskNumber - 1, task);
+        recordChange(stateBeforeChange);
     }
 
     /**
@@ -91,7 +98,9 @@ public class TaskList {
      */
     public Task deleteTask(int taskNumber) throws YqrException {
         Task task = getTask(taskNumber);
+        TaskListState stateBeforeChange = captureState();
         tasks.remove(taskNumber - 1);
+        recordChange(stateBeforeChange);
         return task;
     }
 
@@ -104,7 +113,9 @@ public class TaskList {
      */
     public Task markTaskAsDone(int taskNumber) throws YqrException {
         Task task = getTask(taskNumber);
+        TaskListState stateBeforeChange = captureState();
         task.markAsDone();
+        recordChange(stateBeforeChange);
         return task;
     }
 
@@ -117,7 +128,9 @@ public class TaskList {
      */
     public Task markTaskAsNotDone(int taskNumber) throws YqrException {
         Task task = getTask(taskNumber);
+        TaskListState stateBeforeChange = captureState();
         task.markAsNotDone();
+        recordChange(stateBeforeChange);
         return task;
     }
 
@@ -143,6 +156,63 @@ public class TaskList {
     }
 
     /**
+     * Restores the task list to its state before the most recent change.
+     *
+     * @throws YqrException if no task-changing command can be undone.
+     */
+    public void undo() throws YqrException {
+        if (undoState == null) {
+            throw new YqrException("There is no command to undo");
+        }
+        rollbackState = captureState();
+        rollbackUndoState = undoState;
+        restoreState(undoState);
+        undoState = null;
+    }
+
+    /** Discards rollback data after a task change has been saved successfully. */
+    public void confirmLastChange() {
+        rollbackState = null;
+        rollbackUndoState = null;
+    }
+
+    /** Restores the state and undo history that existed before the latest task change. */
+    public void rollbackLastChange() {
+        if (rollbackState == null) {
+            throw new IllegalStateException("There is no task change to roll back");
+        }
+        restoreState(rollbackState);
+        undoState = rollbackUndoState;
+        confirmLastChange();
+    }
+
+    /** Records a completed task change so it can be undone or rolled back. */
+    private void recordChange(TaskListState stateBeforeChange) {
+        rollbackState = stateBeforeChange;
+        rollbackUndoState = undoState;
+        undoState = stateBeforeChange;
+    }
+
+    /** Creates a snapshot that preserves task order and completion statuses. */
+    private TaskListState captureState() {
+        return new TaskListState(new ArrayList<>(tasks),
+                tasks.stream().map(Task::isDone).toList());
+    }
+
+    /** Restores task order and completion statuses from a snapshot. */
+    private void restoreState(TaskListState state) {
+        tasks.clear();
+        tasks.addAll(state.tasks());
+        for (int i = 0; i < tasks.size(); i++) {
+            if (state.doneStatuses().get(i)) {
+                tasks.get(i).markAsDone();
+            } else {
+                tasks.get(i).markAsNotDone();
+            }
+        }
+    }
+
+    /**
      * Returns the task with the given one-based task number.
      *
      * @param taskNumber one-based task number.
@@ -154,5 +224,9 @@ public class TaskList {
             throw new YqrException("Please input a valid task number");
         }
         return tasks.get(taskNumber - 1);
+    }
+
+    /** Immutable snapshot used for undo and storage-failure rollback. */
+    private record TaskListState(List<Task> tasks, List<Boolean> doneStatuses) {
     }
 }

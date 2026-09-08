@@ -37,7 +37,7 @@ class DukeTest {
         String response = duke.getResponse("unknown");
 
         assertEquals("Unknown command 'unknown'. Available commands: "
-                + "todo, deadline, event, list, mark, unmark, delete, find, bye", response);
+                + "todo, deadline, event, list, mark, unmark, delete, find, undo, bye", response);
     }
 
     @Test
@@ -56,7 +56,7 @@ class DukeTest {
         CommandResult result = duke.getCommandResult("unknown");
 
         assertEquals("Unknown command 'unknown'. Available commands: "
-                + "todo, deadline, event, list, mark, unmark, delete, find, bye", result.text());
+                + "todo, deadline, event, list, mark, unmark, delete, find, undo, bye", result.text());
         assertTrue(result.isError());
     }
 
@@ -106,6 +106,32 @@ class DukeTest {
         duke.getResponse("todo read book");
 
         assertTrue(Files.isRegularFile(dataFile));
+    }
+
+    @Test
+    void getResponse_undoAfterList_previousChangeRestoredAndPersisted() {
+        Path dataFile = temporaryDirectory.resolve("tasks.txt");
+        Duke duke = new Duke(dataFile.toString());
+        duke.getResponse("todo first task");
+        duke.getResponse("todo second task");
+        duke.getResponse("list");
+
+        String undoResponse = duke.getResponse("undo");
+        String listResponse = duke.getResponse("list");
+        Duke reloadedDuke = new Duke(dataFile.toString());
+
+        assertEquals("Done. The most recent change has been undone.", undoResponse);
+        assertEquals("Here are the tasks in your list:\n1. [T][ ] first task", listResponse);
+        assertEquals(listResponse, reloadedDuke.getResponse("list"));
+    }
+
+    @Test
+    void getResponse_undoWithoutPreviousChange_errorReturned() {
+        Duke duke = new Duke(temporaryDirectory.resolve("tasks.txt").toString());
+
+        String response = duke.getResponse("undo");
+
+        assertEquals("There is no command to undo", response);
     }
 
     @Test
