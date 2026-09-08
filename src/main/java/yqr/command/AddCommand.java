@@ -31,14 +31,14 @@ public class AddCommand extends Command {
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws YqrException {
-        int addedTaskNumber = tasks.getTaskCount() + 1;
         tasks.addTask(task);
         try {
             storage.saveTasks(tasks);
         } catch (YqrException e) {
-            tasks.deleteTask(addedTaskNumber);
+            tasks.rollbackLastChange();
             throw e;
         }
+        tasks.confirmLastChange();
         ui.showTaskAdded(task, tasks.getTaskCount());
     }
 }

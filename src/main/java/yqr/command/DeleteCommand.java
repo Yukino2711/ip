@@ -35,9 +35,10 @@ public class DeleteCommand extends Command {
         try {
             storage.saveTasks(tasks);
         } catch (YqrException e) {
-            tasks.insertTask(taskNumber, deletedTask);
+            tasks.rollbackLastChange();
             throw e;
         }
+        tasks.confirmLastChange();
         ui.showTaskDeleted(deletedTask, tasks.getTaskCount());
     }
 }

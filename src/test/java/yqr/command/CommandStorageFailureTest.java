@@ -80,6 +80,40 @@ class CommandStorageFailureTest {
         assertIterableEquals(List.of(), output);
     }
 
+    @Test
+    void execute_undoWhenSavingFails_changeAndUndoAvailabilityRestored() throws YqrException {
+        Todo task = new Todo("task");
+        TaskList tasks = new TaskList();
+        tasks.addTask(task);
+        tasks.confirmLastChange();
+        List<String> output = new ArrayList<>();
+
+        assertThrows(YqrException.class, () -> {
+            new UndoCommand().execute(tasks, new Ui(output::add), failingStorage);
+        });
+
+        assertIterableEquals(List.of(task), tasks.getTasks());
+        assertIterableEquals(List.of(), output);
+
+        tasks.undo();
+        assertEquals(0, tasks.getTaskCount());
+    }
+
+    @Test
+    void execute_failedChange_previousUndoRemainsAvailable() throws YqrException {
+        Todo originalTask = new Todo("original");
+        TaskList tasks = new TaskList();
+        tasks.addTask(originalTask);
+        tasks.confirmLastChange();
+
+        assertThrows(YqrException.class, () -> {
+            new AddCommand(new Todo("failed")).execute(tasks, new Ui(), failingStorage);
+        });
+
+        tasks.undo();
+        assertEquals(0, tasks.getTaskCount());
+    }
+
     /** Storage test double that always fails to save. */
     private static class FailingStorage extends Storage {
         FailingStorage() {

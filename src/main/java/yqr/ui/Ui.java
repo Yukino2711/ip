@@ -103,6 +103,11 @@ public class Ui {
         showLines(message);
     }
 
+    /** Displays confirmation that the most recent task change was undone. */
+    public void showUndoSuccess() {
+        showLines("Done. The most recent change has been undone.");
+    }
+
     /**
      * Displays all tasks in numbered order.
      *

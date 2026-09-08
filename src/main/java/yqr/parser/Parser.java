@@ -14,6 +14,7 @@ import yqr.command.ExitCommand;
 import yqr.command.FindCommand;
 import yqr.command.ListCommand;
 import yqr.command.MarkCommand;
+import yqr.command.UndoCommand;
 import yqr.command.UnmarkCommand;
 import yqr.exception.YqrException;
 import yqr.task.Deadline;
@@ -26,7 +27,7 @@ import yqr.task.Todo;
  */
 public class Parser {
     private static final List<String> COMMAND_WORDS = List.of(
-            "todo", "deadline", "event", "list", "mark", "unmark", "delete", "find", "bye");
+            "todo", "deadline", "event", "list", "mark", "unmark", "delete", "find", "undo", "bye");
     private static final Pattern BY_PARAMETER = parameterPattern("/by");
     private static final Pattern FROM_PARAMETER = parameterPattern("/from");
     private static final Pattern TO_PARAMETER = parameterPattern("/to");
@@ -72,6 +73,11 @@ public class Parser {
                 return new AddCommand(parseEvent(command));
             case "find":
                 return new FindCommand(parseFindKeyword(command));
+            case "undo":
+                if (command.equals("undo")) {
+                    return new UndoCommand();
+                }
+                throw new YqrException("The undo command does not accept parameters");
             case "bye":
                 if (command.equals("bye")) {
                     return new ExitCommand();

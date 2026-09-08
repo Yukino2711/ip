@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import yqr.command.AddCommand;
 import yqr.command.Command;
 import yqr.command.FindCommand;
+import yqr.command.UndoCommand;
 import yqr.exception.YqrException;
 
 /**
@@ -64,7 +65,7 @@ class ParserTest {
     @Test
     void parse_unrecognisedCommand_availableCommandsReturned() {
         assertParseError("unknown", "Unknown command 'unknown'. Available commands: "
-                + "todo, deadline, event, list, mark, unmark, delete, find, bye");
+                + "todo, deadline, event, list, mark, unmark, delete, find, undo, bye");
     }
 
     @Test
@@ -140,6 +141,18 @@ class ParserTest {
         assertParseError("mark +1", "Please input a positive task number");
         assertParseError("delete 0", "Please input a positive task number");
         assertParseError("unmark 999999999999999999999", "The task number is too large");
+    }
+
+    @Test
+    void parse_undoCommand_undoCommandReturned() throws YqrException {
+        Command command = Parser.parse("undo");
+
+        assertInstanceOf(UndoCommand.class, command);
+    }
+
+    @Test
+    void parse_undoWithArguments_clearErrorReturned() {
+        assertParseError("undo 1", "The undo command does not accept parameters");
     }
 
     /** Asserts that parsing fails with a specific user-facing message. */

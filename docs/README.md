@@ -29,6 +29,7 @@ before, after, or between command arguments are accepted. Words written in
 | Unmark a task | `unmark TASK_NUMBER` | `unmark 1` |
 | Delete a task | `delete TASK_NUMBER` | `delete 2` |
 | Find tasks | `find KEYWORD` | `find report` |
+| Undo the latest change | `undo` | `undo` |
 | Exit | `bye` | `bye` |
 
 ## Adding a todo
@@ -138,6 +139,21 @@ find report
 
 yqr displays matching tasks in their original order. The search checks task
 descriptions and does not search deadline dates or event times.
+
+## Undoing the latest change
+
+Undo the most recent command that added, deleted, marked, or unmarked a task.
+
+Format: `undo`
+
+```text
+undo
+```
+
+The restored task list is saved immediately. Only the latest change can be
+undone, and each change can be undone once. Commands that only display
+information, such as `list` and `find`, do not replace the change available for
+undo.
 
 ## Exiting yqr
 
