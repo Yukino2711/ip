@@ -117,6 +117,15 @@ public class Duke {
     }
 
     /**
+     * Returns whether startup encountered a problem while loading saved tasks.
+     *
+     * @return {@code true} when the GUI should highlight the loading warning.
+     */
+    public boolean hasLoadingError() {
+        return !loadingMessage.isEmpty();
+    }
+
+    /**
      * Returns whether the user has entered the exit command.
      *
      * @return {@code true} after a successful {@code bye} command.

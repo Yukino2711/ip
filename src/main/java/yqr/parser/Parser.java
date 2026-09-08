@@ -2,6 +2,8 @@ package yqr.parser;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +25,8 @@ import yqr.task.Todo;
  * Parses user commands and converts their arguments into values used by the application.
  */
 public class Parser {
+    private static final List<String> COMMAND_WORDS = List.of(
+            "todo", "deadline", "event", "list", "mark", "unmark", "delete", "find", "bye");
     private static final Pattern BY_PARAMETER = parameterPattern("/by");
     private static final Pattern FROM_PARAMETER = parameterPattern("/from");
     private static final Pattern TO_PARAMETER = parameterPattern("/to");
@@ -77,7 +81,54 @@ public class Parser {
                 break;
         }
 
-        throw new YqrException("Please input valid commands");
+        throw new YqrException(createUnknownCommandMessage(commandWord));
+    }
+
+    /** Returns an actionable message for an unrecognised command word. */
+    private static String createUnknownCommandMessage(String commandWord) {
+        String suggestion = findClosestCommand(commandWord);
+        if (suggestion != null) {
+            return "Unknown command '" + commandWord + "'. Did you mean '" + suggestion + "'?";
+        }
+        return "Unknown command '" + commandWord + "'. Available commands: "
+                + String.join(", ", COMMAND_WORDS);
+    }
+
+    /** Returns a known command when the input is likely to be a small typo. */
+    private static String findClosestCommand(String commandWord) {
+        String normalizedCommand = commandWord.toLowerCase(Locale.ROOT);
+        String closestCommand = null;
+        int closestDistance = Integer.MAX_VALUE;
+        for (String candidate : COMMAND_WORDS) {
+            int distance = calculateEditDistance(normalizedCommand, candidate);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestCommand = candidate;
+            }
+        }
+        int maximumDistance = normalizedCommand.length() <= 3 ? 1 : 2;
+        return closestDistance <= maximumDistance ? closestCommand : null;
+    }
+
+    /** Calculates the Levenshtein edit distance between two command words. */
+    private static int calculateEditDistance(String source, String target) {
+        int[] previousRow = new int[target.length() + 1];
+        for (int column = 0; column <= target.length(); column++) {
+            previousRow[column] = column;
+        }
+
+        for (int row = 1; row <= source.length(); row++) {
+            int[] currentRow = new int[target.length() + 1];
+            currentRow[0] = row;
+            for (int column = 1; column <= target.length(); column++) {
+                int replacementCost = source.charAt(row - 1) == target.charAt(column - 1) ? 0 : 1;
+                currentRow[column] = Math.min(
+                        Math.min(currentRow[column - 1] + 1, previousRow[column] + 1),
+                        previousRow[column - 1] + replacementCost);
+            }
+            previousRow = currentRow;
+        }
+        return previousRow[target.length()];
     }
 
     /**

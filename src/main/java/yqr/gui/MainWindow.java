@@ -38,7 +38,10 @@ public class MainWindow {
      */
     public void setDuke(Duke duke) {
         this.duke = duke;
-        dialogContainer.getChildren().add(DialogBox.getYqrDialog(duke.getWelcomeMessage()));
+        DialogBox welcomeDialog = duke.hasLoadingError()
+                ? DialogBox.getErrorDialog(duke.getWelcomeMessage())
+                : DialogBox.getYqrDialog(duke.getWelcomeMessage());
+        dialogContainer.getChildren().add(welcomeDialog);
         userInput.requestFocus();
     }
 

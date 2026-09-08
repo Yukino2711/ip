@@ -36,7 +36,8 @@ class DukeTest {
 
         String response = duke.getResponse("unknown");
 
-        assertEquals("Please input valid commands", response);
+        assertEquals("Unknown command 'unknown'. Available commands: "
+                + "todo, deadline, event, list, mark, unmark, delete, find, bye", response);
     }
 
     @Test
@@ -54,7 +55,8 @@ class DukeTest {
 
         CommandResult result = duke.getCommandResult("unknown");
 
-        assertEquals("Please input valid commands", result.text());
+        assertEquals("Unknown command 'unknown'. Available commands: "
+                + "todo, deadline, event, list, mark, unmark, delete, find, bye", result.text());
         assertTrue(result.isError());
     }
 
@@ -88,8 +90,22 @@ class DukeTest {
 
         Duke duke = new Duke(dataFile.toString());
 
+        assertTrue(duke.hasLoadingError());
         assertTrue(duke.getWelcomeMessage().contains("Invalid saved task on line 1"));
         assertEquals("There are no tasks in your list.", duke.getResponse("list"));
+    }
+
+    @Test
+    void missingStorageFile_firstTaskCreatesFileWithoutWarning() {
+        Path dataFile = temporaryDirectory.resolve("new-directory").resolve("tasks.txt");
+        Duke duke = new Duke(dataFile.toString());
+
+        assertFalse(duke.hasLoadingError());
+        assertFalse(Files.exists(dataFile));
+
+        duke.getResponse("todo read book");
+
+        assertTrue(Files.isRegularFile(dataFile));
     }
 
     @Test

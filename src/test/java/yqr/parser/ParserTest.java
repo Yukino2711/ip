@@ -56,6 +56,18 @@ class ParserTest {
     }
 
     @Test
+    void parse_mistypedCommand_helpfulSuggestionReturned() {
+        assertParseError("lits", "Unknown command 'lits'. Did you mean 'list'?");
+        assertParseError("TOD read book", "Unknown command 'TOD'. Did you mean 'todo'?");
+    }
+
+    @Test
+    void parse_unrecognisedCommand_availableCommandsReturned() {
+        assertParseError("unknown", "Unknown command 'unknown'. Available commands: "
+                + "todo, deadline, event, list, mark, unmark, delete, find, bye");
+    }
+
+    @Test
     void parse_deadlineWithFlexibleWhitespace_deadlineCommandReturned() throws YqrException {
         Command command = Parser.parse("  deadline   submit report   /by   2026-09-30  ");
 
