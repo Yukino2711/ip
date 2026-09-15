@@ -17,7 +17,8 @@ class UiTest {
     @Test
     void readCommand_commandSurroundedByWhitespace_trimmedCommandReturned() {
         try (Scanner scanner = new Scanner("  list  \n")) {
-            Ui ui = new Ui(scanner, ignored -> { });
+            Ui ui = new Ui(scanner, ignored -> {
+            });
 
             assertTrue(ui.hasNextCommand());
             assertEquals("list", ui.readCommand());
