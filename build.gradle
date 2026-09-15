@@ -18,27 +18,48 @@ checkstyle {
     toolVersion = '11.0.0'
 }
 
+// Keep both Mac architectures available without merging identically named native libraries.
+configurations {
+    javafxMacIntel { transitive = false }
+    javafxMacArm { transitive = false }
+}
+
 dependencies {
     String javaFxVersion = '17.0.7'
     String jUnitVersion = '5.14.4'
+    String macPlatform = System.getProperty('os.arch') in ['aarch64', 'arm64'] ? 'mac-aarch64' : 'mac'
 
     implementation "org.openjfx:javafx-base:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-base:${javaFxVersion}:mac"
+    implementation "org.openjfx:javafx-base:${javaFxVersion}:${macPlatform}"
     implementation "org.openjfx:javafx-base:${javaFxVersion}:linux"
     implementation "org.openjfx:javafx-controls:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-controls:${javaFxVersion}:mac"
+    implementation "org.openjfx:javafx-controls:${javaFxVersion}:${macPlatform}"
     implementation "org.openjfx:javafx-controls:${javaFxVersion}:linux"
     implementation "org.openjfx:javafx-fxml:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:mac"
+    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:${macPlatform}"
     implementation "org.openjfx:javafx-fxml:${javaFxVersion}:linux"
     implementation "org.openjfx:javafx-graphics:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-graphics:${javaFxVersion}:mac"
+    implementation "org.openjfx:javafx-graphics:${javaFxVersion}:${macPlatform}"
     implementation "org.openjfx:javafx-graphics:${javaFxVersion}:linux"
+
+    javafxMacIntel "org.openjfx:javafx-graphics:${javaFxVersion}:mac"
+    javafxMacArm "org.openjfx:javafx-graphics:${javaFxVersion}:mac-aarch64"
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}"
 
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.14.4'
+}
+
+processResources {
+    from({ configurations.javafxMacIntel.collect { zipTree(it) } }) {
+        include '*.dylib'
+        into 'javafx-natives/mac'
+    }
+    from({ configurations.javafxMacArm.collect { zipTree(it) } }) {
+        include '*.dylib'
+        into 'javafx-natives/mac-aarch64'
+    }
 }
 
 test {
@@ -68,6 +89,8 @@ jar {
 
 shadowJar {
     archiveFileName = 'duke.jar'
+    // The launcher selects the matching Mac libraries from javafx-natives instead.
+    exclude '*.dylib'
     // Preserve service-provider declarations when dependencies contribute them.
     mergeServiceFiles()
     manifest {

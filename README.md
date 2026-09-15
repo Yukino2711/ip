@@ -23,3 +23,19 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    ```
 
 **Warning:** Keep the `src\main\java` folder as the root folder for Java files (i.e., don't rename those folders or move Java files to another folder outside of this folder path), as this is the default location some tools (e.g., Gradle) expect to find Java files.
+
+## Building and running the JAR
+
+Use Java 25, then run these commands from the project root:
+
+```bash
+java -version
+./gradlew clean shadowJar
+java -jar build/libs/duke.jar
+```
+
+On Windows, use `gradlew.bat` instead of `./gradlew`.
+
+The fat JAR includes JavaFX for Windows x64, Linux x64, and both Intel and
+Apple Silicon Macs. Mac native libraries are stored separately by architecture;
+the launcher selects and extracts the matching set before starting JavaFX.
